@@ -1,0 +1,93 @@
+require 'olua.lib'
+
+--------------------------------------------------------------------------
+--                             EXAMPLE CODE                             --
+--------------------------------------------------------------------------
+
+-- A very simple example showing how to use the various Objective Lua
+-- features. It's mostly intended to be read, rather than to do anything
+-- useful.
+--
+-- You can run me with:
+--
+--   lua tools/oluarun.lua -- example.olua
+
+@implementation Organism : olua.lib.Object
+	- consume
+	do
+		print("I doesn't look edible.")
+	end
+	
+	- vocalise
+	do
+		print("I don't make noises.")
+	end
+	
+	- announce
+	do
+		print("I'm a "..([[self class] name]).."!")
+	end
+@end
+
+@implementation Plant : Organism
+@end
+
+@implementation Cabbage : Plant
+	- consume
+	do
+		print("Yuk. Vegetables.")
+	end
+@end
+
+@implementation Foxglove : Plant
+	- consume
+	do
+		print("Suicide is not the only option.")
+	end
+@end
+
+@implementation Animal : Organism
+	- consume
+	do
+		print("Mmm, proteinaceous cytoplasm.")
+	end
+@end
+
+@implementation Dog : Animal
+	- consume
+	do
+		[super consume]
+		print("Needs sauce.")
+	end
+	
+	- vocalise
+	do
+		print("Woof!")
+	end
+@end
+
+@implementation Cow : Animal
+	- consume
+	do
+		[super consume]
+		print("Yum!")
+	end
+	
+	- vocalise
+	do
+		print("Moo!")
+	end
+@end
+
+-- Now we've defined some classes, let's do something with them.
+-- Note the traditional two-stage object construction. This does make
+-- sense, honest.
+
+local function process(object)
+	[object announce]
+	[object vocalise]
+	[object consume]
+end
+
+process([[Dog alloc] init])
+process([[Foxglove alloc] init])

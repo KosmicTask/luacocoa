@@ -1,0 +1,63 @@
+require 'olua'
+
+do
+	@implementation TestClass : olua.lib.Object
+		- noarg
+		do
+			return 99
+		end
+		
+		- onearg: a
+		do
+			return a
+		end
+		
+		- twoarg: a and: b
+		do
+			return a, b
+		end
+		
+		- threearg: a and: b and: c
+		do
+			return a, b, c
+		end
+		
+		- (int) fourarg: (string) a and: (int) b and: c and: (fnord) d
+		do
+			return a, b, c, d
+		end
+		
+		- threeargmulti: a and: b and: c, ...
+		do
+			return a, b, c, ...
+		end
+		 
+		- onelua, a
+		do
+			return a
+		end
+		
+		- twolua, a, b
+		do
+			return a, b
+		end
+		
+		- threeluamulti, a, b, c, ...
+		do
+			return a, b, c, ...
+		end
+		
+	@end
+
+	local o1 = [[TestClass alloc] init]
+	
+	test(function() return [o1 noarg] end, {99})
+	test(function() return [o1 onearg: 99] end, {99})
+	test(function() return [o1 twoarg: 99 and: 98] end, {99, 98})
+	test(function() return [o1 threearg: 99 and: 98 and: 97] end, {99, 98, 97})
+	test(function() return [o1 fourarg: 99 and: 98 and: 97 and: 96] end, {99, 98, 97, 96})
+	test(function() return [o1 threeargmulti: 99 and: 98 and: 97, 96, 95, 94] end, {99, 98, 97, 96, 95, 94})
+	test(function() return [o1 onelua, 99] end, {99})
+	test(function() return [o1 twolua, 99, 98] end, {99, 98})
+	test(function() return [o1 threeluamulti, 99, 98, 97, 96] end, {99, 98, 97, 96})
+end

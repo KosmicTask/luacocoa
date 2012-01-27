@@ -1,0 +1,51 @@
+print("In test_objectivelua.olua")
+--require("olua")
+--require("olua.lib")
+
+-- [[
+local obj_lua_test_string = [[NSString alloc] initWithUTF8String:"Objective Lua test string"]
+print("obj_lua_test_string", obj_lua_test_string)
+--]]
+--[[
+
+@implementation Organism : olua.lib.Object
+	- consume
+	do
+		print("I doesn't look edible.")
+	end
+	
+	- vocalise
+	do
+		print("I don't make noises.")
+	end
+	
+	- announce
+	do
+		print("I'm a "..([[self class] name]).."!")
+	end
+@end
+--]]
+--[[
+function ShimForCreateClass(parent_class, new_class)
+	return LuaCocoa.CreateClass(new_class, parent_class)
+end
+
+createSubclass = ShimForCreateClass
+--]]
+
+--[[
+@interface ObjectiveLuaNumberSubclass : NSNumber
+@end
+--]]
+
+-- [[
+@implementation ObjectiveLuaNumberSubclass : NSNumber
+  - doSomething
+  do
+	print("in ObjectiveLuaNumberSubclass doSomething")
+  end
+@end
+--]]
+
+--local test_number_subclass = [[ObjectiveLuaNumberSubclass alloc] init]
+--[test_number_subclass doSomething]

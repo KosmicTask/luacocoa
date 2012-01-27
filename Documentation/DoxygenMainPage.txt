@@ -1,0 +1,56 @@
+/** @mainpage LuaCocoa Main Page
+LuaCocoa is the next-generation successor to the LuaObjCBridge for Objective-C 2.0.
+
+It uses BridgeSupport, libffi, and a whole lot of blood, sweat, and tears to bridge both C and Objective-C including objects, constants, enums, functions, and structs.
+
+It is similar to PyObjC, RubyCocoa, and JSCocoa.
+
+LuaCocoa is under the MIT license.
+
+Official Site:
+http://playcontrol.net/opensource/LuaCocoa
+
+
+Doxygen Documentation is provided for working on the C and Objective-C side of the bridge. See both the documentation for the LuaCocoa Objective-C class and the support C functions.
+@see LuaCocoa
+@ref LuaCocoa.h
+
+For working on the Lua side of the bridge, see the Documentation page on the official site and the Samples included in the source repository, official distribution.
+
+
+Dedication:
+In memory of my mother who lost her long fight to GIST cancer. (Much of this code was written during long waits at the hospital.) http://playcontrol.net/opensource/LuaCocoa/history-of-lua-cocoa-gist-c.html
+
+
+
+Features: 
+
+- Full bridging to classes/objects, C functions, selectors, structs, enums, constants
+
+- 32-bit and 64-bit support (uses new Obj-C 2.0 runtime), PowerPC & Intel
+
+- Support Obj-C garbage collection and non garbage collection modes
+
+- Subclassing NSObjects in Lua
+
+- Obj-C/C APIs and easily embeddable framework to allow easy integration into existing Obj-C applications
+
+- Scripting Bridge support to allow Applescript control written in Lua scripts instead of Applescript
+
+- Conversion of Lua tables to NSArray and NSDictionary
+
+- Metamethods on NSArray and NSDictionary to respond like Lua tables
+
+- Convenience metamethods to access struct fields
+
+- Auto-boxing of numbers and structs into NSNumbers and NSValues when necessary
+
+- Setter dot notation in Lua
+
+- Proper handling of BOOL types to native Lua boolean types
+
+- Return pass-by-reference out parameters as multiple Lua return values
+
+
+*/
+

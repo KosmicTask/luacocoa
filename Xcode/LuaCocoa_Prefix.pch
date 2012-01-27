@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'LuaCocoa' target in the 'LuaCocoa' project.
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+#endif
