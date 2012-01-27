@@ -865,7 +865,7 @@ id LuaObjectBridge_topropertylist(lua_State* lua_state, int stack_index)
 				return selector_value_box;
 			}
 //			else if(LuaStructBridge_isstruct(lua_state, stack_index))
-			else if(key_name = LuaStructBridge_GetBridgeKeyNameFromMetatable(lua_state, stack_index))
+			else if((key_name = LuaStructBridge_GetBridgeKeyNameFromMetatable(lua_state, stack_index)))
 			{
 				NSString* objc_type = ParseSupport_ObjcTypeFromKeyName(key_name);
 

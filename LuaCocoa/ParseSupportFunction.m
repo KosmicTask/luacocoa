@@ -286,7 +286,7 @@
 		}
 		if(NULL != at_index)
 		{
-			*at_index++;
+			(void)*at_index++;
 		}
 	}
 	return false;
