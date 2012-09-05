@@ -33,7 +33,7 @@ ffi_type* FFISupport_FFITypeForObjcEncodingInNSString(NSString* objc_encoding);
 size_t FFISupport_ParseSupportFunctionArgumentsToFFIType(ParseSupportFunction* parse_support_function, ffi_type* memory_for_custom_types, ffi_type*** ffi_type_for_args, ffi_type** elements_for_ffi_type_for_args);
 
 
-// Watch out! ffi_type_for_args may return a different pointer which is bad if you malloc'd memory.
+// Watch out! ffi_type_for_args always sets/returns a different pointer which is bad if you malloc'd memory. Pass in a pointer by reference.
 size_t FFISupport_ParseSupportFunctionReturnValueToFFIType(ParseSupportFunction* parse_support_function, ffi_type* memory_for_custom_type, ffi_type** ffi_type_for_args, ffi_type** elements_for_ffi_type_for_args);
 
 

@@ -20,3 +20,52 @@ SimpleLuaView["drawRect_"] =
 		NSRectFill(the_rect)
 	end
 }
+
+------------------ The above is all you need.
+------------------ Below shows off categories which is very similar to subclassing.
+------------------ The following is unnecessary to the program.
+
+
+NSView["rightMouseDown_"] =
+{
+	"-v@:@",
+	function(self, the_event)
+		NSLog("rightMouseDown_ %@", the_event)
+	end
+}
+
+NSView["keyDown_"] =
+{
+	"-v@:@",
+	function(self, the_event)
+		NSLog("keyDown_ %@", the_event)
+	end
+}
+
+NSResponder["keyUp_"] =
+{
+	"-v@:@",
+	function(self, the_event)
+		NSLog("keyUp_ %@", the_event)
+	end
+}
+
+-- For contrast, this is our subclass
+SimpleLuaView["mouseDown_"] =
+{
+	"-v@:@",
+	function(self, the_event)
+		NSLog("rightMouseDown_ %@", the_event)
+	end
+}
+
+-- We can also access the SimpleLuaViewAppDelegate even though this file has nothing to do with it.
+-- This will cause the program to exit when the window closes.
+SimpleLuaViewAppDelegate["applicationShouldTerminateAfterLastWindowClosed_"] =
+{
+	"-B@:@",
+	function(self, the_application)
+		print("applicationShouldTerminateAfterLastWindowClosed_ ", self, the_application)
+		return true
+	end
+}

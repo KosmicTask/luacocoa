@@ -407,8 +407,18 @@ NSString* dict_value =
 	return self;
 }		
 
++ (id) parseSupportMethodFromClassName:(NSString *)class_name methodName:(NSString*)method_name isInstance:(bool)is_instance theReceiver:(id)the_receiver isClassMethod:(bool)is_class_method
+{
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
+	ParseSupportMethod* check_cache = [parse_support_cache parseSupportWithClassName:class_name methodName:method_name isClassMethod:is_class_method];
+	if(nil != check_cache)
+	{
+		return check_cache;
+	}
+	return [[[ParseSupportMethod alloc] initWithClassName:class_name methodName:method_name isInstance:is_instance theReceiver:the_receiver isClassMethod:is_class_method] autorelease];
+}
+
 // Need method and/or selector so I can use Obj-C introspection if BridgeSupport is missing
-//- (id) initWithClassName:(NSString *)class_name methodName:(NSString*)method_name isInstance:(bool)is_instance theReceiver:(id)the_receiver theSelector:(SEL)the_selector theMethod:(Method)the_method
 - (id) initWithClassName:(NSString *)class_name methodName:(NSString*)method_name isInstance:(bool)is_instance theReceiver:(id)the_receiver isClassMethod:(bool)is_class_method
 {
 	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
@@ -491,6 +501,17 @@ NSString* dict_value =
 
 	}
 	return self;
+}
+
++ (id) parseSupportMethodFromClassName:(NSString *)class_name methodName:(NSString*)method_name isInstance:(bool)is_instance theReceiver:(id)the_receiver isClassMethod:(bool)is_class_method stringMethodSignature:(const char*)method_signature
+{
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
+	ParseSupportMethod* check_cache = [parse_support_cache parseSupportWithClassName:class_name methodName:method_name isClassMethod:is_class_method];
+	if(nil != check_cache)
+	{
+		return check_cache;
+	}
+	return [[[ParseSupportMethod alloc] initWithClassName:class_name methodName:method_name isInstance:is_instance theReceiver:the_receiver isClassMethod:is_class_method stringMethodSignature:method_signature] autorelease];
 }
 
 - (id) initWithClassName:(NSString *)class_name methodName:(NSString*)method_name isInstance:(bool)is_instance theReceiver:(id)the_receiver isClassMethod:(bool)is_class_method stringMethodSignature:(const char*)method_signature

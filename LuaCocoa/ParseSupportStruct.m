@@ -39,6 +39,19 @@
 @synthesize fieldElementArray;
 @synthesize sizeOfStruct;
 
++ (id) parseSupportStructFromKeyName:(NSString*)key_name
+{
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
+	ParseSupportStruct* check_cache = [parse_support_cache parseSupportWithStructKeyName:key_name];
+	if(nil != check_cache)
+	{
+		return check_cache;
+	}
+	return [[[ParseSupportStruct alloc] initWithKeyName:key_name] autorelease];	
+}
+
+// TODO: Now that I have a new designated initializer, I can change this to not always check parse support 
+// first since it will be redundant. However, I am unclear if I should skip adding to the cache too.
 - (id) initWithKeyName:(NSString*)key_name
 {
 	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
@@ -142,7 +155,7 @@
 #else
 	NSString* type_encoding_string = [[rootElement attributeForName:@"type"] stringValue];
 #endif	
-NSLog(@"type_encoding_string: %@", type_encoding_string);
+//NSLog(@"type_encoding_string: %@", type_encoding_string);
 	// Sample strings:
 	// {CGSize="width"d"height"d}
 	// {CGRect="origin"{CGPoint="x"d"y"d}"size"{CGSize="width"d"height"d}}

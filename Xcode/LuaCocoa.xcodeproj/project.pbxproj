@@ -30,6 +30,23 @@
 			name = "Build LuaCocoa and Utilities";
 			productName = "Build LuaCocoa and Utilities";
 		};
+		007A020A1523DDC900446A62 /* Build All Examples */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 007A020B1523DDC900446A62 /* Build configuration list for PBXAggregateTarget "Build All Examples" */;
+			buildPhases = (
+			);
+			dependencies = (
+				007A02101523DE1600446A62 /* PBXTargetDependency */,
+				007A02121523DE1600446A62 /* PBXTargetDependency */,
+				007A02141523DE1600446A62 /* PBXTargetDependency */,
+				007A02161523DE1600446A62 /* PBXTargetDependency */,
+				007A02181523DE1600446A62 /* PBXTargetDependency */,
+				007A021A1523DE1600446A62 /* PBXTargetDependency */,
+				007A021C1523DE1600446A62 /* PBXTargetDependency */,
+			);
+			name = "Build All Examples";
+			productName = "Build All Examples";
+		};
 		00DDA0371299E71900036662 /* Build All Binaries */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 00DDA03B1299E74300036662 /* Build configuration list for PBXAggregateTarget "Build All Binaries" */;
@@ -38,9 +55,7 @@
 			dependencies = (
 				00DDA03D1299E74500036662 /* PBXTargetDependency */,
 				00DDA03F1299E74500036662 /* PBXTargetDependency */,
-				00DDA0411299E74500036662 /* PBXTargetDependency */,
-				00DDA0431299E74500036662 /* PBXTargetDependency */,
-				00DDA0451299E74500036662 /* PBXTargetDependency */,
+				007A021E1523DE2900446A62 /* PBXTargetDependency */,
 			);
 			name = "Build All Binaries";
 			productName = "Build All Binaries";
@@ -53,9 +68,7 @@
 			);
 			dependencies = (
 				00DDA2421299FD2800036662 /* PBXTargetDependency */,
-				00DDA2441299FD2800036662 /* PBXTargetDependency */,
-				00DDA2461299FD2800036662 /* PBXTargetDependency */,
-				00DDA2481299FD2800036662 /* PBXTargetDependency */,
+				007A02201523DE3E00446A62 /* PBXTargetDependency */,
 				006DE9661324C15C008236FA /* PBXTargetDependency */,
 			);
 			name = CreateDMG;
@@ -91,6 +104,9 @@
 		00000E8410AF70F100D70D52 /* LuaCocoaProxyObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 00000E8210AF70F100D70D52 /* LuaCocoaProxyObject.h */; };
 		0000101910B0D8FD00D70D52 /* LuaCocoaStrongTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 0000101710B0D8FD00D70D52 /* LuaCocoaStrongTable.h */; };
 		0000101A10B0D8FD00D70D52 /* LuaCocoaStrongTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 0000101810B0D8FD00D70D52 /* LuaCocoaStrongTable.m */; };
+		001B4CB014F08FF2001CD36E /* LuaBlockBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = 001B4CAE14F08FF2001CD36E /* LuaBlockBridge.h */; };
+		001B4CB114F08FF2001CD36E /* LuaBlockBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 001B4CAF14F08FF2001CD36E /* LuaBlockBridge.m */; };
+		002FB3AF1566FBD400CC1A47 /* lpeg.so in Copy PlugIns */ = {isa = PBXBuildFile; fileRef = 00D5A64C1566FA6600718681 /* lpeg.so */; };
 		0050AF8510821D4500DFBEC6 /* BridgeSupportController.h in Headers */ = {isa = PBXBuildFile; fileRef = 0050AF7F10821D4500DFBEC6 /* BridgeSupportController.h */; };
 		0050AF8610821D4500DFBEC6 /* BridgeSupportController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0050AF8010821D4500DFBEC6 /* BridgeSupportController.m */; };
 		0050AF8710821D4500DFBEC6 /* LuaCUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0050AF8110821D4500DFBEC6 /* LuaCUtils.c */; };
@@ -113,7 +129,24 @@
 		0051AECB1256B5950047D73E /* luacocoa in CopyFiles */ = {isa = PBXBuildFile; fileRef = 00E16942124596690095535F /* luacocoa */; };
 		006467E41081A20200183915 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 006467E31081A20200183915 /* main.m */; };
 		006467ED1081A2A200183915 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
-		006467EE1081A2A600183915 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
+		0065BB92151145EF0085E364 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00D4A4FC14ECA4C5009E57C5 /* Cocoa.framework */; };
+		0065BB98151145EF0085E364 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0065BB96151145EF0085E364 /* InfoPlist.strings */; };
+		0065BB9A151145EF0085E364 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0065BB99151145EF0085E364 /* main.m */; };
+		0065BB9E151145EF0085E364 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 0065BB9C151145EF0085E364 /* Credits.rtf */; };
+		0065BBA1151145EF0085E364 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0065BBA0151145EF0085E364 /* AppDelegate.m */; };
+		0065BBA4151145EF0085E364 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0065BBA2151145EF0085E364 /* MainMenu.xib */; };
+		0065BBAD151146D80085E364 /* LCFileWatch.m in Sources */ = {isa = PBXBuildFile; fileRef = 0065BBAA151146D80085E364 /* LCFileWatch.m */; };
+		0065BBAE151146D80085E364 /* TextEditorSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 0065BBAC151146D80085E364 /* TextEditorSupport.m */; };
+		0065BBB1151147830085E364 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
+		0065BBB51511511D0085E364 /* Default.lua in Resources */ = {isa = PBXBuildFile; fileRef = 0065BBB41511511D0085E364 /* Default.lua */; };
+		0065BBBC151152410085E364 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00D4A4FC14ECA4C5009E57C5 /* Cocoa.framework */; };
+		0065BBC2151152410085E364 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0065BBC0151152410085E364 /* InfoPlist.strings */; };
+		0065BBC4151152410085E364 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0065BBC3151152410085E364 /* main.m */; };
+		0065BBC8151152410085E364 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 0065BBC6151152410085E364 /* Credits.rtf */; };
+		0065BBCB151152410085E364 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0065BBCA151152410085E364 /* AppDelegate.m */; };
+		0065BBCE151152410085E364 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0065BBCC151152410085E364 /* MainMenu.xib */; };
+		0065BBD4151152F60085E364 /* OpenSavePanelBlocks.lua in Resources */ = {isa = PBXBuildFile; fileRef = 0065BBD3151152F60085E364 /* OpenSavePanelBlocks.lua */; };
+		0065BBD7151158110085E364 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
 		00689FE010A88CDC006EAA0E /* LuaFunctionBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = 00689FDE10A88CDC006EAA0E /* LuaFunctionBridge.h */; settings = {ATTRIBUTES = (); }; };
 		00689FE110A88CDC006EAA0E /* LuaFunctionBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 00689FDF10A88CDC006EAA0E /* LuaFunctionBridge.m */; };
 		0068A6D610AB3DCE006EAA0E /* LuaCocoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 0068A6D410AB3DCE006EAA0E /* LuaCocoa.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -125,7 +158,6 @@
 		0071AD00127EC49A003EE1C0 /* luaconf.h in Headers */ = {isa = PBXBuildFile; fileRef = 0071ACFF127EC49A003EE1C0 /* luaconf.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00760495109E93940079B079 /* LuaCocoa.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
 		007607A2109EA3A20079B079 /* liblua.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 007606AD109E9D460079B079 /* liblua.a */; };
-		0076ED9E108BE4BD0079B079 /* lpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = 0076ED97108BE4BD0079B079 /* lpeg.c */; };
 		0076EDA5108BE4EE0079B079 /* re.lua in Resources */ = {isa = PBXBuildFile; fileRef = 0076ED9B108BE4BD0079B079 /* re.lua */; };
 		0076EDD7108BE5350079B079 /* grammar.lua in Copy leg */ = {isa = PBXBuildFile; fileRef = 0076EDB9108BE50B0079B079 /* grammar.lua */; };
 		0076EDD8108BE5350079B079 /* init.lua in Copy leg */ = {isa = PBXBuildFile; fileRef = 0076EDBA108BE50B0079B079 /* init.lua */; };
@@ -178,7 +210,26 @@
 		009C729C13280EA500CE3543 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0867D69BFE84028FC02AAC07 /* Foundation.framework */; };
 		009E38841313AA0100DA7545 /* ParseSupportCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 009E38821313AA0100DA7545 /* ParseSupportCache.h */; };
 		009E38851313AA0100DA7545 /* ParseSupportCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 009E38831313AA0100DA7545 /* ParseSupportCache.m */; };
+		00BB37F814FCDA500004258A /* LuaCocoaAvailableLuaStates.h in Headers */ = {isa = PBXBuildFile; fileRef = 00BB37F614FCDA4F0004258A /* LuaCocoaAvailableLuaStates.h */; };
+		00BB37F914FCDA500004258A /* LuaCocoaAvailableLuaStates.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BB37F714FCDA4F0004258A /* LuaCocoaAvailableLuaStates.m */; };
+		00BB380D150B5ED30004258A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00D4A4FC14ECA4C5009E57C5 /* Cocoa.framework */; };
+		00BB3813150B5ED30004258A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 00BB3811150B5ED30004258A /* InfoPlist.strings */; };
+		00BB3815150B5ED30004258A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BB3814150B5ED30004258A /* main.m */; };
+		00BB3819150B5ED30004258A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 00BB3817150B5ED30004258A /* Credits.rtf */; };
+		00BB381C150B5ED30004258A /* BlocksExampleAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 00BB381B150B5ED30004258A /* BlocksExampleAppDelegate.m */; };
+		00BB381F150B5ED30004258A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 00BB381D150B5ED30004258A /* MainMenu.xib */; };
+		00BB3825150B62D10004258A /* BlocksExample.lua in Resources */ = {isa = PBXBuildFile; fileRef = 00BB3824150B62D00004258A /* BlocksExample.lua */; };
+		00BB3826150B640F0004258A /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
 		00C0BF4114B9082300AA4495 /* libreadline.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C0BF4014B9082300AA4495 /* libreadline.dylib */; };
+		00D4A4FD14ECA4C5009E57C5 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00D4A4FC14ECA4C5009E57C5 /* Cocoa.framework */; };
+		00D4A50714ECA4C5009E57C5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 00D4A50514ECA4C5009E57C5 /* InfoPlist.strings */; };
+		00D4A50914ECA4C5009E57C5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 00D4A50814ECA4C5009E57C5 /* main.m */; };
+		00D4A50D14ECA4C5009E57C5 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 00D4A50B14ECA4C5009E57C5 /* Credits.rtf */; };
+		00D4A51014ECA4C5009E57C5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 00D4A50F14ECA4C5009E57C5 /* AppDelegate.m */; };
+		00D4A51314ECA4C6009E57C5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 00D4A51114ECA4C6009E57C5 /* MainMenu.xib */; };
+		00D4A51C14ECA582009E57C5 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
+		00D4A51E14ECA8B9009E57C5 /* OpenSavePanelDelegate.lua in Sources */ = {isa = PBXBuildFile; fileRef = 00D4A51D14ECA8B9009E57C5 /* OpenSavePanelDelegate.lua */; };
+		00D4A51F14ECAC94009E57C5 /* OpenSavePanelDelegate.lua in Resources */ = {isa = PBXBuildFile; fileRef = 00D4A51D14ECA8B9009E57C5 /* OpenSavePanelDelegate.lua */; };
 		00DF0B9412605A56007AED88 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DC2EF5B0486A6940098B216 /* LuaCocoa.framework */; };
 		00DF0B9512605A56007AED88 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00E169AB1245AD3F0095535F /* Cocoa.framework */; };
 		00DF0BC812605A8B007AED88 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 00DF0BB012605A8B007AED88 /* InfoPlist.strings */; };
@@ -240,6 +291,20 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = LuaCocoa;
 		};
+		0065BBB21511478C0085E364 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = LuaCocoa;
+		};
+		0065BBD5151158060085E364 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = LuaCocoa;
+		};
 		006DE9651324C15C008236FA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -282,12 +347,110 @@
 			remoteGlobalIDString = 00760538109E987A0079B079;
 			remoteInfo = liblua;
 		};
+		007A020F1523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 00E16AEE1245BD2D0095535F;
+			remoteInfo = SimpleLuaView;
+		};
+		007A02111523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 00DF0B8812605A56007AED88;
+			remoteInfo = SimpleLuaOpenGLView;
+		};
+		007A02131523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 008397AA128250A4009609AE;
+			remoteInfo = CoreAnimationScriptability;
+		};
+		007A02151523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 00D4A4F814ECA4C5009E57C5;
+			remoteInfo = OpenSavePanelDelegatePattern;
+		};
+		007A02171523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0065BBB9151152410085E364;
+			remoteInfo = OpenSavePanelBlocksPattern;
+		};
+		007A02191523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 00BB380A150B5ED30004258A;
+			remoteInfo = BlocksExample;
+		};
+		007A021B1523DE1600446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0065BB8F151145EF0085E364;
+			remoteInfo = PrototypeLauncher;
+		};
+		007A021D1523DE2900446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 007A020A1523DDC900446A62;
+			remoteInfo = "Build All Examples";
+		};
+		007A021F1523DE3E00446A62 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 007A020A1523DDC900446A62;
+			remoteInfo = "Build All Examples";
+		};
 		008397F91282530F009609AE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = LuaCocoa;
+		};
+		00BB3827150B644D0004258A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = LuaCocoa;
+		};
+		00D4A51A14ECA579009E57C5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = LuaCocoa;
+		};
+		00D5A64B1566FA6600718681 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00D5A6461566FA6500718681 /* lpeg.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00D5A6311566F6DF00718681;
+			remoteInfo = lpeg;
+		};
+		00D5A64D1566FA6600718681 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00D5A6461566FA6500718681 /* lpeg.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00D5A5D11566DF6200718681;
+			remoteInfo = liblpeg;
+		};
+		00D5A6661566FB5A00718681 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00D5A6461566FA6500718681 /* lpeg.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 00D5A6301566F6DF00718681;
+			remoteInfo = lpeg;
 		};
 		00DDA03C1299E74500036662 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -303,54 +466,12 @@
 			remoteGlobalIDString = 006467DC1081A1CA00183915;
 			remoteInfo = TestApp;
 		};
-		00DDA0401299E74500036662 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 00E16AEE1245BD2D0095535F;
-			remoteInfo = SimpleLuaView;
-		};
-		00DDA0421299E74500036662 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 00DF0B8812605A56007AED88;
-			remoteInfo = SimpleLuaOpenGLView;
-		};
-		00DDA0441299E74500036662 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 008397AA128250A4009609AE;
-			remoteInfo = CoreAnimationScriptability;
-		};
 		00DDA2411299FD2800036662 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 0051AEE21256B6580047D73E;
 			remoteInfo = "Build LuaCocoa and Utilities";
-		};
-		00DDA2431299FD2800036662 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 00E16AEE1245BD2D0095535F;
-			remoteInfo = SimpleLuaView;
-		};
-		00DDA2451299FD2800036662 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 00DF0B8812605A56007AED88;
-			remoteInfo = SimpleLuaOpenGLView;
-		};
-		00DDA2471299FD2800036662 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 008397AA128250A4009609AE;
-			remoteInfo = CoreAnimationScriptability;
 		};
 		00DF0B8A12605A56007AED88 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -476,6 +597,17 @@
 			name = "Copy leg";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		00D5A6681566FB6F00718681 /* Copy PlugIns */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				002FB3AF1566FBD400CC1A47 /* lpeg.so in Copy PlugIns */,
+			);
+			name = "Copy PlugIns";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -485,6 +617,8 @@
 		00000E8310AF70F100D70D52 /* LuaCocoaProxyObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LuaCocoaProxyObject.m; sourceTree = "<group>"; };
 		0000101710B0D8FD00D70D52 /* LuaCocoaStrongTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LuaCocoaStrongTable.h; sourceTree = "<group>"; };
 		0000101810B0D8FD00D70D52 /* LuaCocoaStrongTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LuaCocoaStrongTable.m; sourceTree = "<group>"; };
+		001B4CAE14F08FF2001CD36E /* LuaBlockBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LuaBlockBridge.h; sourceTree = "<group>"; };
+		001B4CAF14F08FF2001CD36E /* LuaBlockBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LuaBlockBridge.m; sourceTree = "<group>"; };
 		0050AF7F10821D4500DFBEC6 /* BridgeSupportController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BridgeSupportController.h; sourceTree = "<group>"; };
 		0050AF8010821D4500DFBEC6 /* BridgeSupportController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BridgeSupportController.m; sourceTree = "<group>"; };
 		0050AF8110821D4500DFBEC6 /* LuaCUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LuaCUtils.c; sourceTree = "<group>"; };
@@ -509,6 +643,30 @@
 		006467DF1081A1CA00183915 /* TestApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TestApp-Info.plist"; sourceTree = "<group>"; };
 		006467E31081A20200183915 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ../Test/main.m; sourceTree = "<group>"; };
 		006469571081EE9600183915 /* test.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = test.lua; path = ../Test/test.lua; sourceTree = "<group>"; };
+		0065BB90151145EF0085E364 /* PrototypeLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrototypeLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0065BB95151145EF0085E364 /* PrototypeLauncher-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PrototypeLauncher-Info.plist"; sourceTree = "<group>"; };
+		0065BB97151145EF0085E364 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0065BB99151145EF0085E364 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		0065BB9B151145EF0085E364 /* PrototypeLauncher-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PrototypeLauncher-Prefix.pch"; sourceTree = "<group>"; };
+		0065BB9D151145EF0085E364 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		0065BB9F151145EF0085E364 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		0065BBA0151145EF0085E364 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0065BBA3151145EF0085E364 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		0065BBA9151146D80085E364 /* LCFileWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCFileWatch.h; sourceTree = "<group>"; };
+		0065BBAA151146D80085E364 /* LCFileWatch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LCFileWatch.m; sourceTree = "<group>"; };
+		0065BBAB151146D80085E364 /* TextEditorSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextEditorSupport.h; sourceTree = "<group>"; };
+		0065BBAC151146D80085E364 /* TextEditorSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextEditorSupport.m; sourceTree = "<group>"; };
+		0065BBB41511511D0085E364 /* Default.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lua; path = Default.lua; sourceTree = "<group>"; };
+		0065BBBA151152410085E364 /* OpenSavePanelBlocksPattern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenSavePanelBlocksPattern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0065BBBF151152410085E364 /* OpenSavePanelBlocksPattern-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenSavePanelBlocksPattern-Info.plist"; sourceTree = "<group>"; };
+		0065BBC1151152410085E364 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0065BBC3151152410085E364 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		0065BBC5151152410085E364 /* OpenSavePanelBlocksPattern-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OpenSavePanelBlocksPattern-Prefix.pch"; sourceTree = "<group>"; };
+		0065BBC7151152410085E364 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		0065BBC9151152410085E364 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		0065BBCA151152410085E364 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0065BBCD151152410085E364 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		0065BBD3151152F60085E364 /* OpenSavePanelBlocks.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lua; path = OpenSavePanelBlocks.lua; sourceTree = "<group>"; };
 		00689FDE10A88CDC006EAA0E /* LuaFunctionBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LuaFunctionBridge.h; sourceTree = "<group>"; };
 		00689FDF10A88CDC006EAA0E /* LuaFunctionBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = LuaFunctionBridge.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		0068A6D410AB3DCE006EAA0E /* LuaCocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LuaCocoa.h; sourceTree = "<group>"; };
@@ -614,7 +772,34 @@
 		0097B0EF10C7733100DABE6A /* test_objectivelua.olua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = test_objectivelua.olua; path = ../Test/test_objectivelua.olua; sourceTree = SOURCE_ROOT; };
 		009E38821313AA0100DA7545 /* ParseSupportCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseSupportCache.h; sourceTree = "<group>"; };
 		009E38831313AA0100DA7545 /* ParseSupportCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseSupportCache.m; sourceTree = "<group>"; };
+		00BB37F614FCDA4F0004258A /* LuaCocoaAvailableLuaStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LuaCocoaAvailableLuaStates.h; sourceTree = "<group>"; };
+		00BB37F714FCDA4F0004258A /* LuaCocoaAvailableLuaStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LuaCocoaAvailableLuaStates.m; sourceTree = "<group>"; };
+		00BB380B150B5ED30004258A /* BlocksExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlocksExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		00BB3810150B5ED30004258A /* BlocksExample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BlocksExample-Info.plist"; sourceTree = "<group>"; };
+		00BB3812150B5ED30004258A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		00BB3814150B5ED30004258A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		00BB3816150B5ED30004258A /* BlocksExample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BlocksExample-Prefix.pch"; sourceTree = "<group>"; };
+		00BB3818150B5ED30004258A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		00BB381A150B5ED30004258A /* BlocksExampleAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlocksExampleAppDelegate.h; sourceTree = "<group>"; };
+		00BB381B150B5ED30004258A /* BlocksExampleAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlocksExampleAppDelegate.m; sourceTree = "<group>"; };
+		00BB381E150B5ED30004258A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		00BB3824150B62D00004258A /* BlocksExample.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BlocksExample.lua; sourceTree = "<group>"; };
 		00C0BF4014B9082300AA4495 /* libreadline.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libreadline.dylib; path = usr/lib/libreadline.dylib; sourceTree = SDKROOT; };
+		00D4A4F914ECA4C5009E57C5 /* OpenSavePanelDelegatePattern.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenSavePanelDelegatePattern.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		00D4A4FC14ECA4C5009E57C5 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		00D4A4FF14ECA4C5009E57C5 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		00D4A50014ECA4C5009E57C5 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		00D4A50114ECA4C5009E57C5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		00D4A50414ECA4C5009E57C5 /* OpenSavePanelDelegatePattern-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OpenSavePanelDelegatePattern-Info.plist"; sourceTree = "<group>"; };
+		00D4A50614ECA4C5009E57C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		00D4A50814ECA4C5009E57C5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		00D4A50A14ECA4C5009E57C5 /* OpenSavePanelDelegatePattern-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OpenSavePanelDelegatePattern-Prefix.pch"; sourceTree = "<group>"; };
+		00D4A50C14ECA4C5009E57C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		00D4A50E14ECA4C5009E57C5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		00D4A50F14ECA4C5009E57C5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		00D4A51214ECA4C6009E57C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		00D4A51D14ECA8B9009E57C5 /* OpenSavePanelDelegate.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lua; path = OpenSavePanelDelegate.lua; sourceTree = "<group>"; };
+		00D5A6461566FA6500718681 /* lpeg.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = lpeg.xcodeproj; sourceTree = "<group>"; };
 		00DDA2C9129A1F4500036662 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE.txt; path = ../LICENSE.txt; sourceTree = SOURCE_ROOT; };
 		00DDA2CA129A1F4500036662 /* README.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = README.rtf; path = ../README.rtf; sourceTree = SOURCE_ROOT; };
 		00DF0B9A12605A56007AED88 /* SimpleLuaOpenGLView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleLuaOpenGLView.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -662,8 +847,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				006467ED1081A2A200183915 /* LuaCocoa.framework in Frameworks */,
-				006467EE1081A2A600183915 /* Cocoa.framework in Frameworks */,
 				0097A25F10BF8FD800DABE6A /* QuartzCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0065BB8D151145EF0085E364 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0065BBB1151147830085E364 /* LuaCocoa.framework in Frameworks */,
+				0065BB92151145EF0085E364 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0065BBB7151152410085E364 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0065BBD7151158110085E364 /* LuaCocoa.framework in Frameworks */,
+				0065BBBC151152410085E364 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -673,6 +875,24 @@
 			files = (
 				008397FB12825320009609AE /* LuaCocoa.framework in Frameworks */,
 				0083980212825377009609AE /* QuartzCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00BB3808150B5ED30004258A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00BB3826150B640F0004258A /* LuaCocoa.framework in Frameworks */,
+				00BB380D150B5ED30004258A /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00D4A4F614ECA4C5009E57C5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00D4A51C14ECA582009E57C5 /* LuaCocoa.framework in Frameworks */,
+				00D4A4FD14ECA4C5009E57C5 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -743,6 +963,10 @@
 				00EC519310BE4A1C0022E17C /* LuaClassDefinitionMap.m */,
 				00E16EFA1249DD270095535F /* LuaFFIClosure.h */,
 				00E16EFB1249DD270095535F /* LuaFFIClosure.m */,
+				001B4CAE14F08FF2001CD36E /* LuaBlockBridge.h */,
+				001B4CAF14F08FF2001CD36E /* LuaBlockBridge.m */,
+				00BB37F614FCDA4F0004258A /* LuaCocoaAvailableLuaStates.h */,
+				00BB37F714FCDA4F0004258A /* LuaCocoaAvailableLuaStates.m */,
 				0068A6A710AB3C41006EAA0E /* BridgeSupport */,
 				0068A6A310AB394D006EAA0E /* ParseSupport */,
 				0068A6A510AB3998006EAA0E /* HelperUtils */,
@@ -766,8 +990,11 @@
 		0051B1081256DFE90047D73E /* Samples */ = {
 			isa = PBXGroup;
 			children = (
+				00BB380E150B5ED30004258A /* BlocksExample */,
 				008397DE128251C9009609AE /* HybridCoreAnimationScriptability */,
 				0051B10D1256E0410047D73E /* MinimalAppKit */,
+				00D4A50214ECA4C5009E57C5 /* OpenSavePanelDelegatePattern */,
+				0065BBBD151152410085E364 /* OpenSavePanelBlocksPattern */,
 				0051B10B1256E0410047D73E /* ScriptingBridge_iTunes */,
 				00E16AFC1245BD580095535F /* SimpleLuaView */,
 				00DF0B9F12605A8B007AED88 /* SimpleLuaOpenGLView */,
@@ -801,6 +1028,60 @@
 				0097B0EF10C7733100DABE6A /* test_objectivelua.olua */,
 			);
 			name = TestApp;
+			sourceTree = "<group>";
+		};
+		0065BB93151145EF0085E364 /* PrototypeLauncher */ = {
+			isa = PBXGroup;
+			children = (
+				0065BBA9151146D80085E364 /* LCFileWatch.h */,
+				0065BBAA151146D80085E364 /* LCFileWatch.m */,
+				0065BBAB151146D80085E364 /* TextEditorSupport.h */,
+				0065BBAC151146D80085E364 /* TextEditorSupport.m */,
+				0065BB9F151145EF0085E364 /* AppDelegate.h */,
+				0065BBA0151145EF0085E364 /* AppDelegate.m */,
+				0065BBB41511511D0085E364 /* Default.lua */,
+				0065BBA2151145EF0085E364 /* MainMenu.xib */,
+				0065BB94151145EF0085E364 /* Supporting Files */,
+			);
+			name = PrototypeLauncher;
+			path = ../LuaCocoa/Samples/PrototypeLauncher;
+			sourceTree = "<group>";
+		};
+		0065BB94151145EF0085E364 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0065BB95151145EF0085E364 /* PrototypeLauncher-Info.plist */,
+				0065BB96151145EF0085E364 /* InfoPlist.strings */,
+				0065BB99151145EF0085E364 /* main.m */,
+				0065BB9B151145EF0085E364 /* PrototypeLauncher-Prefix.pch */,
+				0065BB9C151145EF0085E364 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		0065BBBD151152410085E364 /* OpenSavePanelBlocksPattern */ = {
+			isa = PBXGroup;
+			children = (
+				0065BBC9151152410085E364 /* AppDelegate.h */,
+				0065BBCA151152410085E364 /* AppDelegate.m */,
+				0065BBCC151152410085E364 /* MainMenu.xib */,
+				0065BBBE151152410085E364 /* Supporting Files */,
+				0065BBD3151152F60085E364 /* OpenSavePanelBlocks.lua */,
+			);
+			name = OpenSavePanelBlocksPattern;
+			path = ../LuaCocoa/Samples/OpenSavePanelBlocksPattern;
+			sourceTree = "<group>";
+		};
+		0065BBBE151152410085E364 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0065BBBF151152410085E364 /* OpenSavePanelBlocksPattern-Info.plist */,
+				0065BBC0151152410085E364 /* InfoPlist.strings */,
+				0065BBC3151152410085E364 /* main.m */,
+				0065BBC5151152410085E364 /* OpenSavePanelBlocksPattern-Prefix.pch */,
+				0065BBC6151152410085E364 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		0068A6A310AB394D006EAA0E /* ParseSupport */ = {
@@ -1047,6 +1328,84 @@
 			path = tools;
 			sourceTree = "<group>";
 		};
+		00BB380E150B5ED30004258A /* BlocksExample */ = {
+			isa = PBXGroup;
+			children = (
+				00BB381A150B5ED30004258A /* BlocksExampleAppDelegate.h */,
+				00BB381B150B5ED30004258A /* BlocksExampleAppDelegate.m */,
+				00BB381D150B5ED30004258A /* MainMenu.xib */,
+				00BB380F150B5ED30004258A /* Supporting Files */,
+			);
+			name = BlocksExample;
+			path = ../LuaCocoa/Samples/BlocksExample;
+			sourceTree = "<group>";
+		};
+		00BB380F150B5ED30004258A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				00BB3810150B5ED30004258A /* BlocksExample-Info.plist */,
+				00BB3811150B5ED30004258A /* InfoPlist.strings */,
+				00BB3814150B5ED30004258A /* main.m */,
+				00BB3816150B5ED30004258A /* BlocksExample-Prefix.pch */,
+				00BB3817150B5ED30004258A /* Credits.rtf */,
+				00BB3824150B62D00004258A /* BlocksExample.lua */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		00D4A4FB14ECA4C5009E57C5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				00D4A4FC14ECA4C5009E57C5 /* Cocoa.framework */,
+				00D4A4FE14ECA4C5009E57C5 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		00D4A4FE14ECA4C5009E57C5 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				00D4A4FF14ECA4C5009E57C5 /* AppKit.framework */,
+				00D4A50014ECA4C5009E57C5 /* CoreData.framework */,
+				00D4A50114ECA4C5009E57C5 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		00D4A50214ECA4C5009E57C5 /* OpenSavePanelDelegatePattern */ = {
+			isa = PBXGroup;
+			children = (
+				00D4A50E14ECA4C5009E57C5 /* AppDelegate.h */,
+				00D4A50F14ECA4C5009E57C5 /* AppDelegate.m */,
+				00D4A51114ECA4C6009E57C5 /* MainMenu.xib */,
+				00D4A50314ECA4C5009E57C5 /* Supporting Files */,
+				00D4A51D14ECA8B9009E57C5 /* OpenSavePanelDelegate.lua */,
+			);
+			name = OpenSavePanelDelegatePattern;
+			path = ../LuaCocoa/Samples/OpenSavePanelDelegatePattern;
+			sourceTree = "<group>";
+		};
+		00D4A50314ECA4C5009E57C5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				00D4A50414ECA4C5009E57C5 /* OpenSavePanelDelegatePattern-Info.plist */,
+				00D4A50514ECA4C5009E57C5 /* InfoPlist.strings */,
+				00D4A50814ECA4C5009E57C5 /* main.m */,
+				00D4A50A14ECA4C5009E57C5 /* OpenSavePanelDelegatePattern-Prefix.pch */,
+				00D4A50B14ECA4C5009E57C5 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		00D5A6471566FA6500718681 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				00D5A64C1566FA6600718681 /* lpeg.so */,
+				00D5A64E1566FA6600718681 /* liblpeg.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		00DF0B9F12605A8B007AED88 /* SimpleLuaOpenGLView */ = {
 			isa = PBXGroup;
 			children = (
@@ -1114,6 +1473,10 @@
 				00E16AEF1245BD2D0095535F /* SimpleLuaView.app */,
 				00DF0B9A12605A56007AED88 /* SimpleLuaOpenGLView.app */,
 				008397AB128250A4009609AE /* CoreAnimationScriptability.app */,
+				00D4A4F914ECA4C5009E57C5 /* OpenSavePanelDelegatePattern.app */,
+				00BB380B150B5ED30004258A /* BlocksExample.app */,
+				0065BB90151145EF0085E364 /* PrototypeLauncher.app */,
+				0065BBBA151152410085E364 /* OpenSavePanelBlocksPattern.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1134,6 +1497,8 @@
 				32C88DFF0371C24200C91783 /* Other Sources */,
 				089C1665FE841158C02AAC07 /* Resources */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
+				0065BB93151145EF0085E364 /* PrototypeLauncher */,
+				00D4A4FB14ECA4C5009E57C5 /* Frameworks */,
 				034768DFFF38A50411DB9C8B /* Products */,
 				006467DF1081A1CA00183915 /* TestApp-Info.plist */,
 				00E1697A124599050095535F /* Foundation.framework */,
@@ -1148,6 +1513,7 @@
 			children = (
 				0051AE3D1256AAF00047D73E /* Lua Public Headers */,
 				00760613109E9A800079B079 /* lua.xcodeproj */,
+				00D5A6461566FA6500718681 /* lpeg.xcodeproj */,
 				1058C7B0FEA5585E11CA2CBB /* Linked Frameworks */,
 				1058C7B2FEA5585E11CA2CBB /* Other Frameworks */,
 			);
@@ -1231,6 +1597,8 @@
 				00E16EFC1249DD270095535F /* LuaFFIClosure.h in Headers */,
 				009E38841313AA0100DA7545 /* ParseSupportCache.h in Headers */,
 				0080B5EB13D4E0A2007F5F85 /* NSStringHelperFunctions.h in Headers */,
+				001B4CB014F08FF2001CD36E /* LuaBlockBridge.h in Headers */,
+				00BB37F814FCDA500004258A /* LuaCocoaAvailableLuaStates.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1256,6 +1624,42 @@
 			productReference = 006467DD1081A1CA00183915 /* TestApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		0065BB8F151145EF0085E364 /* PrototypeLauncher */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0065BBA5151145EF0085E364 /* Build configuration list for PBXNativeTarget "PrototypeLauncher" */;
+			buildPhases = (
+				0065BB8C151145EF0085E364 /* Sources */,
+				0065BB8D151145EF0085E364 /* Frameworks */,
+				0065BB8E151145EF0085E364 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0065BBB31511478C0085E364 /* PBXTargetDependency */,
+			);
+			name = PrototypeLauncher;
+			productName = PrototypeLauncher;
+			productReference = 0065BB90151145EF0085E364 /* PrototypeLauncher.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0065BBB9151152410085E364 /* OpenSavePanelBlocksPattern */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0065BBCF151152410085E364 /* Build configuration list for PBXNativeTarget "OpenSavePanelBlocksPattern" */;
+			buildPhases = (
+				0065BBB6151152410085E364 /* Sources */,
+				0065BBB7151152410085E364 /* Frameworks */,
+				0065BBB8151152410085E364 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0065BBD6151158060085E364 /* PBXTargetDependency */,
+			);
+			name = OpenSavePanelBlocksPattern;
+			productName = OpenSavePanelBlocksPattern;
+			productReference = 0065BBBA151152410085E364 /* OpenSavePanelBlocksPattern.app */;
+			productType = "com.apple.product-type.application";
+		};
 		008397AA128250A4009609AE /* CoreAnimationScriptability */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 008397B1128250A6009609AE /* Build configuration list for PBXNativeTarget "CoreAnimationScriptability" */;
@@ -1272,6 +1676,42 @@
 			name = CoreAnimationScriptability;
 			productName = CoreAnimationScriptability;
 			productReference = 008397AB128250A4009609AE /* CoreAnimationScriptability.app */;
+			productType = "com.apple.product-type.application";
+		};
+		00BB380A150B5ED30004258A /* BlocksExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00BB3820150B5ED30004258A /* Build configuration list for PBXNativeTarget "BlocksExample" */;
+			buildPhases = (
+				00BB3807150B5ED30004258A /* Sources */,
+				00BB3808150B5ED30004258A /* Frameworks */,
+				00BB3809150B5ED30004258A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				00BB3828150B644D0004258A /* PBXTargetDependency */,
+			);
+			name = BlocksExample;
+			productName = BlocksExample;
+			productReference = 00BB380B150B5ED30004258A /* BlocksExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+		00D4A4F814ECA4C5009E57C5 /* OpenSavePanelDelegatePattern */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00D4A51414ECA4C6009E57C5 /* Build configuration list for PBXNativeTarget "OpenSavePanelDelegatePattern" */;
+			buildPhases = (
+				00D4A4F514ECA4C5009E57C5 /* Sources */,
+				00D4A4F614ECA4C5009E57C5 /* Frameworks */,
+				00D4A4F714ECA4C5009E57C5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				00D4A51B14ECA579009E57C5 /* PBXTargetDependency */,
+			);
+			name = OpenSavePanelDelegatePattern;
+			productName = OpenSavePanelDelegatePattern;
+			productReference = 00D4A4F914ECA4C5009E57C5 /* OpenSavePanelDelegatePattern.app */;
 			productType = "com.apple.product-type.application";
 		};
 		00DF0B8812605A56007AED88 /* SimpleLuaOpenGLView */ = {
@@ -1336,6 +1776,8 @@
 				8DC2EF540486A6940098B216 /* Sources */,
 				8DC2EF560486A6940098B216 /* Frameworks */,
 				007604A5109E949E0079B079 /* Copy Frameworks */,
+				00D5A6681566FB6F00718681 /* Copy PlugIns */,
+				002FB43A156721B600CC1A47 /* Workaround Broken Xcode Copy PlugIns */,
 				8DC2EF520486A6940098B216 /* Resources */,
 				0051AE521256AF0D0047D73E /* Copy Utility Executables */,
 				0097AFFE10C76A2400DABE6A /* Copy leg */,
@@ -1347,6 +1789,7 @@
 			);
 			dependencies = (
 				0076099D109EFCCC0079B079 /* PBXTargetDependency */,
+				00D5A6671566FB5A00718681 /* PBXTargetDependency */,
 				0051AE4E1256AEAF0047D73E /* PBXTargetDependency */,
 				0051AE501256AEAF0047D73E /* PBXTargetDependency */,
 			);
@@ -1373,11 +1816,16 @@
 				Japanese,
 				French,
 				German,
+				en,
 			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* LuaCocoa */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 00D5A6471566FA6500718681 /* Products */;
+					ProjectRef = 00D5A6461566FA6500718681 /* lpeg.xcodeproj */;
+				},
 				{
 					ProductGroup = 007606A4109E9D460079B079 /* Products */;
 					ProjectRef = 00760613109E9A800079B079 /* lua.xcodeproj */;
@@ -1391,9 +1839,14 @@
 				00E16941124596690095535F /* luacocoa_shell */,
 				0051AEC41256B5380047D73E /* Embed luacocoa_shell */,
 				006467DC1081A1CA00183915 /* TestApp */,
+				007A020A1523DDC900446A62 /* Build All Examples */,
 				00E16AEE1245BD2D0095535F /* SimpleLuaView */,
 				00DF0B8812605A56007AED88 /* SimpleLuaOpenGLView */,
 				008397AA128250A4009609AE /* CoreAnimationScriptability */,
+				00D4A4F814ECA4C5009E57C5 /* OpenSavePanelDelegatePattern */,
+				0065BBB9151152410085E364 /* OpenSavePanelBlocksPattern */,
+				00BB380A150B5ED30004258A /* BlocksExample */,
+				0065BB8F151145EF0085E364 /* PrototypeLauncher */,
 				00DDA07E1299EFBE00036662 /* CreateDMG */,
 				00EFE3301323748700182307 /* Build Documentation */,
 				00EFE3C413238A7700182307 /* Clean Documentation */,
@@ -1430,6 +1883,20 @@
 			remoteRef = 007606B0109E9D460079B079 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		00D5A64C1566FA6600718681 /* lpeg.so */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = lpeg.so;
+			remoteRef = 00D5A64B1566FA6600718681 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		00D5A64E1566FA6600718681 /* liblpeg.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liblpeg.a;
+			remoteRef = 00D5A64D1566FA6600718681 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -1442,6 +1909,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0065BB8E151145EF0085E364 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0065BB98151145EF0085E364 /* InfoPlist.strings in Resources */,
+				0065BB9E151145EF0085E364 /* Credits.rtf in Resources */,
+				0065BBB51511511D0085E364 /* Default.lua in Resources */,
+				0065BBA4151145EF0085E364 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0065BBB8151152410085E364 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0065BBC2151152410085E364 /* InfoPlist.strings in Resources */,
+				0065BBD4151152F60085E364 /* OpenSavePanelBlocks.lua in Resources */,
+				0065BBC8151152410085E364 /* Credits.rtf in Resources */,
+				0065BBCE151152410085E364 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		008397A7128250A4009609AE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1449,6 +1938,28 @@
 				008397F3128251C9009609AE /* MyAnimationDescription.lua in Resources */,
 				008397EF128251C9009609AE /* InfoPlist.strings in Resources */,
 				008397F0128251C9009609AE /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00BB3809150B5ED30004258A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00BB3813150B5ED30004258A /* InfoPlist.strings in Resources */,
+				00BB3819150B5ED30004258A /* Credits.rtf in Resources */,
+				00BB381F150B5ED30004258A /* MainMenu.xib in Resources */,
+				00BB3825150B62D10004258A /* BlocksExample.lua in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00D4A4F714ECA4C5009E57C5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00D4A51F14ECAC94009E57C5 /* OpenSavePanelDelegate.lua in Resources */,
+				00D4A50714ECA4C5009E57C5 /* InfoPlist.strings in Resources */,
+				00D4A50D14ECA4C5009E57C5 /* Credits.rtf in Resources */,
+				00D4A51314ECA4C6009E57C5 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1485,6 +1996,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		002FB43A156721B600CC1A47 /* Workaround Broken Xcode Copy PlugIns */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Workaround Broken Xcode Copy PlugIns";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Xcode 4.3.2 is incorrectly copying PlugIns to the Resource directory.\n# The variable $PLUGINS_FOLDER_PATH is wrong too and points to Resources: LuaCocoa.framework/Versions/A/Resources\necho \"BUILT_PRODUCTS_DIR $BUILT_PRODUCTS_DIR\"\necho \"CONTENTS_FOLDER_PATH  $CONTENTS_FOLDER_PATH\"\necho \"PLUGINS_FOLDER_PATH  $PLUGINS_FOLDER_PATH\"\necho \"WRAPPER_NAME  $WRAPPER_NAME\"\n# override the wrong value with the correct value\nPLUGINS_FOLDER_PATH=\"$CONTENTS_FOLDER_PATH/PlugIns\"\nmkdir -p \"$BUILT_PRODUCTS_DIR/$PLUGINS_FOLDER_PATH\"\nmv \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/lpeg.so\" \"$BUILT_PRODUCTS_DIR/$PLUGINS_FOLDER_PATH\"\n# Need to create the symlink too\nln -sf \"$BUILT_PRODUCTS_DIR/$PLUGINS_FOLDER_PATH\" \"$BUILT_PRODUCTS_DIR/$WRAPPER_NAME/PlugIns\"\n";
+		};
 		00C0BF4214B9082B00AA4495 /* Rewrite libreadline dependency for backwards compatibility */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1519,7 +2044,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/ScriptingBridge\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/PureLua\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\ncp -R $TARGET_BUILD_DIR/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/\n\ncp -R $TARGET_BUILD_DIR/SimpleLuaView.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\ncp -R $TARGET_BUILD_DIR/SimpleLuaOpenGLView.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\ncp -R $TARGET_BUILD_DIR/CoreAnimationScriptability.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\n\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaView.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaView.app/Contents/Frameworks/LuaCocoa.framework\n\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaOpenGLView.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaOpenGLView.app/Contents/Frameworks/LuaCocoa.framework\n\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/CoreAnimationScriptability.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/CoreAnimationScriptability.app/Contents/Frameworks/LuaCocoa.framework\n\ncp -R $SRCROOT/../LuaCocoa/Samples/SimpleLuaView $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\ncp -R $SRCROOT/../LuaCocoa/Samples/SimpleLuaOpenGLView $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\ncp -R $SRCROOT/../LuaCocoa/Samples/HybridCoreAnimationScriptability $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\n\ncp -R $SRCROOT/../LuaCocoa/Samples/MinimalAppKit $TARGET_BUILD_DIR/dmg-tmp/Examples/PureLua\nchmod +x $TARGET_BUILD_DIR/dmg-tmp/Examples/PureLua/MinimalAppKit/MinimalAppKit.lua\n\ncp -R $SRCROOT/../LuaCocoa/Samples/ScriptingBridge_iTunes $TARGET_BUILD_DIR/dmg-tmp/Examples/ScriptingBridge\nchmod +x $TARGET_BUILD_DIR/dmg-tmp/Examples/ScriptingBridge/ScriptingBridge_iTunes/ScriptingBridge_iTunes.lua\n\ncp $SRCROOT/../README.rtf $TARGET_BUILD_DIR/dmg-tmp\ncp $SRCROOT/../LICENSE.txt $TARGET_BUILD_DIR/dmg-tmp\ncp -R $SRCROOT/../Documentation/html/net.playcontrol.LuaCocoa.docset $TARGET_BUILD_DIR/dmg-tmp\n\n# remove the .DS_Store files if any\nfind $TARGET_BUILD_DIR/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n\n# for fancy .dmg\n#mkdir -p $TARGET_BUILD_DIR/dmg-tmp/.logo\n#cp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\n#cp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname LuaCocoa -srcfolder $TARGET_BUILD_DIR/dmg-tmp $TARGET_BUILD_DIR/LuaCocoa.dmg\n\n# clean up\nrm -rf $TARGET_BUILD_DIR/dmg-tmp\n\n# compress it???\n#(cd build; gnutar -zcvf $TARGET_BUILD_DIR/LuaCocoa.dmg.tar.gz $TARGET_BUILD_DIR/LuaCocoa.dmg)";
+			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/ScriptingBridge\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/PureLua\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\ncp -R $TARGET_BUILD_DIR/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/\n\n\n\n\ncp -R $TARGET_BUILD_DIR/CoreAnimationScriptability.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/CoreAnimationScriptability.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/CoreAnimationScriptability.app/Contents/Frameworks/LuaCocoa.framework\ncp -R $SRCROOT/../LuaCocoa/Samples/HybridCoreAnimationScriptability $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\ncp -R $TARGET_BUILD_DIR/OpenSavePanelBlocksPattern.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/OpenSavePanelBlocksPattern.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/OpenSavePanelBlocksPattern.app/Contents/Frameworks/LuaCocoa.framework\ncp -R $SRCROOT/../LuaCocoa/Samples/OpenSavePanelBlocksPattern $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\ncp -R $TARGET_BUILD_DIR/OpenSavePanelDelegatePattern.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/OpenSavePanelDelegatePattern.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/OpenSavePanelDelegatePattern.app/Contents/Frameworks/LuaCocoa.framework\ncp -R $SRCROOT/../LuaCocoa/Samples/OpenSavePanelDelegatePattern $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\ncp -R $TARGET_BUILD_DIR/SimpleLuaOpenGLView.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaOpenGLView.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaOpenGLView.app/Contents/Frameworks/LuaCocoa.framework\ncp -R $SRCROOT/../LuaCocoa/Samples/SimpleLuaOpenGLView $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\ncp -R $TARGET_BUILD_DIR/SimpleLuaView.app $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated\nmkdir -p $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaView.app/Contents/Frameworks\ncp -R $TARGET_BUILD_DIR/dmg-tmp/LuaCocoa.framework $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SimpleLuaView.app/Contents/Frameworks/LuaCocoa.framework\ncp -R $SRCROOT/../LuaCocoa/Samples/SimpleLuaView $TARGET_BUILD_DIR/dmg-tmp/Examples/Integrated/SourceCode\n\n\n\n\n\ncp -R $SRCROOT/../LuaCocoa/Samples/MinimalAppKit $TARGET_BUILD_DIR/dmg-tmp/Examples/PureLua\nchmod +x $TARGET_BUILD_DIR/dmg-tmp/Examples/PureLua/MinimalAppKit/MinimalAppKit.lua\n\ncp -R $SRCROOT/../LuaCocoa/Samples/ScriptingBridge_iTunes $TARGET_BUILD_DIR/dmg-tmp/Examples/ScriptingBridge\nchmod +x $TARGET_BUILD_DIR/dmg-tmp/Examples/ScriptingBridge/ScriptingBridge_iTunes/ScriptingBridge_iTunes.lua\n\ncp $SRCROOT/../README.rtf $TARGET_BUILD_DIR/dmg-tmp\ncp $SRCROOT/../LICENSE.txt $TARGET_BUILD_DIR/dmg-tmp\ncp -R $SRCROOT/../Documentation/html/net.playcontrol.LuaCocoa.docset $TARGET_BUILD_DIR/dmg-tmp\n\n# remove the .DS_Store files if any\nfind $TARGET_BUILD_DIR/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n\n# for fancy .dmg\n#mkdir -p $TARGET_BUILD_DIR/dmg-tmp/.logo\n#cp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\n#cp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname LuaCocoa -srcfolder $TARGET_BUILD_DIR/dmg-tmp $TARGET_BUILD_DIR/LuaCocoa.dmg\n\n# clean up\nrm -rf $TARGET_BUILD_DIR/dmg-tmp\n\n# compress it???\n#(cd build; gnutar -zcvf $TARGET_BUILD_DIR/LuaCocoa.dmg.tar.gz $TARGET_BUILD_DIR/LuaCocoa.dmg)";
 		};
 		00EFE32F1323748700182307 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1563,6 +2088,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0065BB8C151145EF0085E364 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0065BB9A151145EF0085E364 /* main.m in Sources */,
+				0065BBA1151145EF0085E364 /* AppDelegate.m in Sources */,
+				0065BBAD151146D80085E364 /* LCFileWatch.m in Sources */,
+				0065BBAE151146D80085E364 /* TextEditorSupport.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0065BBB6151152410085E364 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0065BBC4151152410085E364 /* main.m in Sources */,
+				0065BBCB151152410085E364 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		008397A8128250A4009609AE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1571,6 +2116,25 @@
 				008397F1128251C9009609AE /* LCFileWatch.m in Sources */,
 				008397F2128251C9009609AE /* main.m in Sources */,
 				008397F4128251C9009609AE /* TextEditorSupport.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00BB3807150B5ED30004258A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00BB3815150B5ED30004258A /* main.m in Sources */,
+				00BB381C150B5ED30004258A /* BlocksExampleAppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00D4A4F514ECA4C5009E57C5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00D4A50914ECA4C5009E57C5 /* main.m in Sources */,
+				00D4A51014ECA4C5009E57C5 /* AppDelegate.m in Sources */,
+				00D4A51E14ECA8B9009E57C5 /* OpenSavePanelDelegate.lua in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1610,7 +2174,6 @@
 				0050B37610863E9D00DFBEC6 /* StructSupport.m in Sources */,
 				0050B3B71086942700DFBEC6 /* ParseSupport.m in Sources */,
 				0050B3C21086A2AF00DFBEC6 /* ParseSupportStruct.m in Sources */,
-				0076ED9E108BE4BD0079B079 /* lpeg.c in Sources */,
 				0076F50A10913B000079B079 /* ObjectSupport.m in Sources */,
 				0076F50C10913B010079B079 /* LuaObjectBridge.m in Sources */,
 				0076F6F71093C1E70079B079 /* ParseSupportFunction.m in Sources */,
@@ -1628,6 +2191,8 @@
 				00E16EFD1249DD270095535F /* LuaFFIClosure.m in Sources */,
 				009E38851313AA0100DA7545 /* ParseSupportCache.m in Sources */,
 				0080B5E913D4E087007F5F85 /* NSStringHelperFunctions.m in Sources */,
+				001B4CB114F08FF2001CD36E /* LuaBlockBridge.m in Sources */,
+				00BB37F914FCDA500004258A /* LuaCocoaAvailableLuaStates.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1659,6 +2224,16 @@
 			target = 8DC2EF4F0486A6940098B216 /* LuaCocoa */;
 			targetProxy = 006467FA1081A36D00183915 /* PBXContainerItemProxy */;
 		};
+		0065BBB31511478C0085E364 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* LuaCocoa */;
+			targetProxy = 0065BBB21511478C0085E364 /* PBXContainerItemProxy */;
+		};
+		0065BBD6151158060085E364 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* LuaCocoa */;
+			targetProxy = 0065BBD5151158060085E364 /* PBXContainerItemProxy */;
+		};
 		006DE9661324C15C008236FA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 00EFE3301323748700182307 /* Build Documentation */;
@@ -1669,10 +2244,70 @@
 			name = liblua;
 			targetProxy = 0076099C109EFCCC0079B079 /* PBXContainerItemProxy */;
 		};
+		007A02101523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 00E16AEE1245BD2D0095535F /* SimpleLuaView */;
+			targetProxy = 007A020F1523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A02121523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 00DF0B8812605A56007AED88 /* SimpleLuaOpenGLView */;
+			targetProxy = 007A02111523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A02141523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 008397AA128250A4009609AE /* CoreAnimationScriptability */;
+			targetProxy = 007A02131523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A02161523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 00D4A4F814ECA4C5009E57C5 /* OpenSavePanelDelegatePattern */;
+			targetProxy = 007A02151523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A02181523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0065BBB9151152410085E364 /* OpenSavePanelBlocksPattern */;
+			targetProxy = 007A02171523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A021A1523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 00BB380A150B5ED30004258A /* BlocksExample */;
+			targetProxy = 007A02191523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A021C1523DE1600446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0065BB8F151145EF0085E364 /* PrototypeLauncher */;
+			targetProxy = 007A021B1523DE1600446A62 /* PBXContainerItemProxy */;
+		};
+		007A021E1523DE2900446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 007A020A1523DDC900446A62 /* Build All Examples */;
+			targetProxy = 007A021D1523DE2900446A62 /* PBXContainerItemProxy */;
+		};
+		007A02201523DE3E00446A62 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 007A020A1523DDC900446A62 /* Build All Examples */;
+			targetProxy = 007A021F1523DE3E00446A62 /* PBXContainerItemProxy */;
+		};
 		008397FA1282530F009609AE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DC2EF4F0486A6940098B216 /* LuaCocoa */;
 			targetProxy = 008397F91282530F009609AE /* PBXContainerItemProxy */;
+		};
+		00BB3828150B644D0004258A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* LuaCocoa */;
+			targetProxy = 00BB3827150B644D0004258A /* PBXContainerItemProxy */;
+		};
+		00D4A51B14ECA579009E57C5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8DC2EF4F0486A6940098B216 /* LuaCocoa */;
+			targetProxy = 00D4A51A14ECA579009E57C5 /* PBXContainerItemProxy */;
+		};
+		00D5A6671566FB5A00718681 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = lpeg;
+			targetProxy = 00D5A6661566FB5A00718681 /* PBXContainerItemProxy */;
 		};
 		00DDA03D1299E74500036662 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1684,40 +2319,10 @@
 			target = 006467DC1081A1CA00183915 /* TestApp */;
 			targetProxy = 00DDA03E1299E74500036662 /* PBXContainerItemProxy */;
 		};
-		00DDA0411299E74500036662 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 00E16AEE1245BD2D0095535F /* SimpleLuaView */;
-			targetProxy = 00DDA0401299E74500036662 /* PBXContainerItemProxy */;
-		};
-		00DDA0431299E74500036662 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 00DF0B8812605A56007AED88 /* SimpleLuaOpenGLView */;
-			targetProxy = 00DDA0421299E74500036662 /* PBXContainerItemProxy */;
-		};
-		00DDA0451299E74500036662 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 008397AA128250A4009609AE /* CoreAnimationScriptability */;
-			targetProxy = 00DDA0441299E74500036662 /* PBXContainerItemProxy */;
-		};
 		00DDA2421299FD2800036662 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 0051AEE21256B6580047D73E /* Build LuaCocoa and Utilities */;
 			targetProxy = 00DDA2411299FD2800036662 /* PBXContainerItemProxy */;
-		};
-		00DDA2441299FD2800036662 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 00E16AEE1245BD2D0095535F /* SimpleLuaView */;
-			targetProxy = 00DDA2431299FD2800036662 /* PBXContainerItemProxy */;
-		};
-		00DDA2461299FD2800036662 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 00DF0B8812605A56007AED88 /* SimpleLuaOpenGLView */;
-			targetProxy = 00DDA2451299FD2800036662 /* PBXContainerItemProxy */;
-		};
-		00DDA2481299FD2800036662 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 008397AA128250A4009609AE /* CoreAnimationScriptability */;
-			targetProxy = 00DDA2471299FD2800036662 /* PBXContainerItemProxy */;
 		};
 		00DF0B8912605A56007AED88 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1737,6 +2342,54 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		0065BB96151145EF0085E364 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0065BB97151145EF0085E364 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		0065BB9C151145EF0085E364 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0065BB9D151145EF0085E364 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		0065BBA2151145EF0085E364 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0065BBA3151145EF0085E364 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		0065BBC0151152410085E364 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0065BBC1151152410085E364 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		0065BBC6151152410085E364 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0065BBC7151152410085E364 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		0065BBCC151152410085E364 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0065BBCD151152410085E364 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
 		008397E3128251C9009609AE /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1749,6 +2402,54 @@
 			isa = PBXVariantGroup;
 			children = (
 				008397E6128251C9009609AE /* English */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		00BB3811150B5ED30004258A /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				00BB3812150B5ED30004258A /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		00BB3817150B5ED30004258A /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				00BB3818150B5ED30004258A /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		00BB381D150B5ED30004258A /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				00BB381E150B5ED30004258A /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		00D4A50514ECA4C5009E57C5 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				00D4A50614ECA4C5009E57C5 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		00D4A50B14ECA4C5009E57C5 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				00D4A50C14ECA4C5009E57C5 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		00D4A51114ECA4C6009E57C5 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				00D4A51214ECA4C6009E57C5 /* en */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -1896,6 +2597,155 @@
 			};
 			name = Release;
 		};
+		0065BBA6151145EF0085E364 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/PrototypeLauncher/PrototypeLauncher-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/PrototypeLauncher/PrototypeLauncher-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		0065BBA7151145EF0085E364 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/PrototypeLauncher/PrototypeLauncher-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/PrototypeLauncher/PrototypeLauncher-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		0065BBA8151145EF0085E364 /* Debug_Native */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/PrototypeLauncher/PrototypeLauncher-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/PrototypeLauncher/PrototypeLauncher-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug_Native;
+		};
+		0065BBD0151152410085E364 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelBlocksPattern/OpenSavePanelBlocksPattern-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelBlocksPattern/OpenSavePanelBlocksPattern-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		0065BBD1151152410085E364 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelBlocksPattern/OpenSavePanelBlocksPattern-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelBlocksPattern/OpenSavePanelBlocksPattern-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		0065BBD2151152410085E364 /* Debug_Native */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelBlocksPattern/OpenSavePanelBlocksPattern-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelBlocksPattern/OpenSavePanelBlocksPattern-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug_Native;
+		};
+		007A020C1523DDC900446A62 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		007A020D1523DDC900446A62 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		007A020E1523DDC900446A62 /* Debug_Native */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug_Native;
+		};
 		008397AE128250A5009609AE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1962,6 +2812,70 @@
 			};
 			name = Debug_Native;
 		};
+		00BB3821150B5ED30004258A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/BlocksExample/BlocksExample-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/BlocksExample/BlocksExample-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		00BB3822150B5ED30004258A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/BlocksExample/BlocksExample-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/BlocksExample/BlocksExample-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		00BB3823150B5ED30004258A /* Debug_Native */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/BlocksExample/BlocksExample-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/BlocksExample/BlocksExample-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug_Native;
+		};
 		00D400A710A48C53005559C7 /* Debug_Native */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1998,7 +2912,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = LuaCocoa_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = NSBUILDINGLUACOCOA;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NSBUILDINGLUACOCOA,
+					LUA_USE_OBJC_EXCEPTIONS,
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@rpath";
@@ -2030,6 +2947,73 @@
 					AppKit,
 				);
 				PRODUCT_NAME = TestApp;
+			};
+			name = Debug_Native;
+		};
+		00D4A51514ECA4C6009E57C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelDelegatePattern/OpenSavePanelDelegatePattern-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelDelegatePattern/OpenSavePanelDelegatePattern-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/../../..";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		00D4A51614ECA4C6009E57C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelDelegatePattern/OpenSavePanelDelegatePattern-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelDelegatePattern/OpenSavePanelDelegatePattern-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/../../..";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		00D4A51714ECA4C6009E57C5 /* Debug_Native */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelDelegatePattern/OpenSavePanelDelegatePattern-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../LuaCocoa/Samples/OpenSavePanelDelegatePattern/OpenSavePanelDelegatePattern-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/../../..";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Debug_Native;
 		};
@@ -2355,7 +3339,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = LuaCocoa_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = NSBUILDINGLUACOCOA;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NSBUILDINGLUACOCOA,
+					LUA_USE_OBJC_EXCEPTIONS,
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@rpath";
@@ -2376,7 +3363,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = LuaCocoa_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = NSBUILDINGLUACOCOA;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NSBUILDINGLUACOCOA,
+					LUA_USE_OBJC_EXCEPTIONS,
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@rpath";
@@ -2464,12 +3454,62 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		0065BBA5151145EF0085E364 /* Build configuration list for PBXNativeTarget "PrototypeLauncher" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0065BBA6151145EF0085E364 /* Debug */,
+				0065BBA7151145EF0085E364 /* Release */,
+				0065BBA8151145EF0085E364 /* Debug_Native */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0065BBCF151152410085E364 /* Build configuration list for PBXNativeTarget "OpenSavePanelBlocksPattern" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0065BBD0151152410085E364 /* Debug */,
+				0065BBD1151152410085E364 /* Release */,
+				0065BBD2151152410085E364 /* Debug_Native */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		007A020B1523DDC900446A62 /* Build configuration list for PBXAggregateTarget "Build All Examples" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				007A020C1523DDC900446A62 /* Debug */,
+				007A020D1523DDC900446A62 /* Release */,
+				007A020E1523DDC900446A62 /* Debug_Native */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		008397B1128250A6009609AE /* Build configuration list for PBXNativeTarget "CoreAnimationScriptability" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				008397AE128250A5009609AE /* Debug */,
 				008397AF128250A5009609AE /* Release */,
 				008397B0128250A5009609AE /* Debug_Native */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00BB3820150B5ED30004258A /* Build configuration list for PBXNativeTarget "BlocksExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00BB3821150B5ED30004258A /* Debug */,
+				00BB3822150B5ED30004258A /* Release */,
+				00BB3823150B5ED30004258A /* Debug_Native */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00D4A51414ECA4C6009E57C5 /* Build configuration list for PBXNativeTarget "OpenSavePanelDelegatePattern" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00D4A51514ECA4C6009E57C5 /* Debug */,
+				00D4A51614ECA4C6009E57C5 /* Release */,
+				00D4A51714ECA4C6009E57C5 /* Debug_Native */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

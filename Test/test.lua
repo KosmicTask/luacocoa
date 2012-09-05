@@ -6,7 +6,7 @@ LuaCocoa.import("Foundation")
 
 -- [=====[
 LuaCocoa.import("CoreGraphics", "/System/Library/Frameworks/ApplicationServices.framework/Frameworks")
---LuaCocoa.import("AppKit")
+LuaCocoa.import("AppKit")
 LuaCocoa.import("QuartzCore")
 
 print("in lua, package.path", package.path)
@@ -21,6 +21,8 @@ print("in lua, package.path", package.path)
 
 print("<enum name='NSIntegerMax' value64='9223372036854775807' value='2147483647'> is:", NSIntegerMax)
 print("<enum name='NSIntegerMin' value64='-9223372036854775808' value='-2147483648'> is:", NSIntegerMin)
+
+print("<enum name='NSFoundationVersionNumber10_5_3' value='677.19'> is:", NSFoundationVersionNumber10_5_3)
 
 print("<enum name='NSAppKitVersionNumber10_5_3' value='949.33000000000004'> is:", NSAppKitVersionNumber10_5_3)
 
@@ -593,9 +595,10 @@ end
 			-- Moving to Lion/non-Fullbridgesupport introduced a bug with selectors because the bridgesupport data format is different
 			new_class["someMethodToInvokeViaSelector"] =
 			{
-				"-v@:@",
+				"-@@:",
 				function (self)
 					print("In someMethodToInvokeViaSelector")
+					return nil
 				end
 			}
 

@@ -30,124 +30,127 @@ static LuaClassDefinitionMap* s_luaClassDefinitionMap = nil;
 	self = [super init];
 	if(nil != self)
 	{
-		// I don't think classes ever get collected, but we also don't want them to be retained
-		// We want the map to retain the pointer arrays
-		classToLuaStateMap = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory|NSPointerFunctionsOpaquePersonality valueOptions:NSPointerFunctionsStrongMemory capacity:16];
+		classToSelectorMap = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaquePersonality valueOptions:NSMapTableStrongMemory capacity:0];
+		
+		// optimized reverse mapping to help removal and is defined checks
+		luaToClassToSelectorMap = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaquePersonality valueOptions:NSMapTableStrongMemory capacity:0];
 
-//		classToLuaStateMap = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
 
 - (void) dealloc
 {
-	[classToLuaStateMap release];
+	// I think I can just delete the top level objects and don't need to iterate through each.
+	[luaToClassToSelectorMap release];
+	[classToSelectorMap release];
+	
 	[super dealloc];
 }
 
-- (void) addLuaState:(lua_State*)lua_state forClass:(Class)the_class
+- (void) addLuaState:(lua_State*)lua_state forClass:(Class)the_class forSelector:(SEL)the_selector
 {
-	if(NULL == lua_state || NULL == the_class)
+	// Should I allow NULL selectors to be a key?
+	// This would allow for CreateClass which has no selector.
+	if(NULL == lua_state || NULL == the_class || NULL == the_selector)
 	{
 		return;
 	}
-	// First: find out if an array already exists for this key
-	NSPointerArray* list_of_lua_states = [classToLuaStateMap objectForKey:the_class];
-	if(nil == list_of_lua_states)
-	{
-		// We need to create a new pointer array to hold the new lua state.
-		list_of_lua_states = [[[NSPointerArray alloc] initWithOptions:NSPointerFunctionsOpaqueMemory|NSPointerFunctionsOpaquePersonality] autorelease];
-		[list_of_lua_states addPointer:lua_state];
-		[classToLuaStateMap setObject:list_of_lua_states forKey:the_class];
+	
+	// The documentation doesn't list NSPointerFunctionsOpaquePersonality as a supported option,
+	// but the others don't seem correct (crash) for void* pointers.
+	// The documentation implicitly says void* pointers are allowed through the C-API functions.
+	// But the C creation function seems to be marked 'legacy'. 
+	// I am under the impression that this is the correct way to do this.
+	// This seems to work so far for me (10.7). 
+	// If this is a problem, I might need to use NSSet and wrap pointers in NSValue.
 
+	
+	// Does this mapping already exist?
+	NSMapTable* selector_map = (NSMapTable*)NSMapGet(classToSelectorMap, the_class);
+	if(nil == selector_map)
+	{
+		// There is no map which means this is a new entry and we need to allocate a new map
+		selector_map = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaquePersonality valueOptions:NSMapTableStrongMemory capacity:0];
+		NSMapInsert(classToSelectorMap, the_class, selector_map);
+		[selector_map release];
 	}
-	else
+	
+	// Does this mapping already exist?
+	NSHashTable* lua_set = (NSHashTable*)NSMapGet(selector_map, the_selector);
+	if(nil == lua_set)
 	{
-		// Make sure the lua_state is not already in the list
-		bool already_in_list = false;
-		NSUInteger number_of_array_elements = [list_of_lua_states count];
+		// There is no map which means this is a new entry and we need to allocate a new map
+		lua_set = [[NSHashTable alloc] initWithOptions:NSPointerFunctionsOpaquePersonality capacity:0];
+		NSMapInsert(selector_map, the_selector, lua_set);
+		[lua_set release];
+	}
+	
+	// Can just insert the pointer since we don't have to allocate any data structures unlike above
+	NSHashInsert(lua_set, lua_state);
 
-		for(NSUInteger i = 0; i < number_of_array_elements; i++)
+
+	// Add lua reverse mapping to help optimize reverse searches for existence and removal
+	NSMapInsert(luaToClassToSelectorMap, lua_state, selector_map);
+}
+
+- (lua_State*) anyLuaStateForSelector:(SEL)the_selector inClass:(Class)the_class
+{
+	NSMapTable* selector_map = (NSMapTable*)NSMapGet(classToSelectorMap, the_class);
+	if(nil != selector_map)
+	{
+		NSHashTable* lua_set = (NSHashTable*)NSMapGet(selector_map, the_selector);
+		if(nil != lua_set)
 		{
-			if([list_of_lua_states pointerAtIndex:i] == lua_state)
+			if(NSCountHashTable(lua_set) > 0)
 			{
-				already_in_list = true;
-				break;
+				// Drat, there doesn't seem to be an anyObject in the C-API and I don't trust the Obj-C API for pointer types.
+				NSHashEnumerator enumerator = NSEnumerateHashTable(lua_set);
+				return (lua_State*)NSNextHashEnumeratorItem(&enumerator);
 			}
 		}
-		if(false == already_in_list)
+	}
+	return NULL;
+}
+
+- (bool) isSelectorDefined:(SEL)the_selector inClass:(Class)the_class inLuaState:(lua_State*)lua_state
+{
+	NSMapTable* selector_map = (NSMapTable*)NSMapGet(classToSelectorMap, the_class);
+	if(nil != selector_map)
+	{
+		NSHashTable* lua_set = (NSHashTable*)NSMapGet(selector_map, the_selector);
+		if(nil != lua_set)
 		{
-			// Add the lua state to the list
-			[list_of_lua_states addPointer:lua_state];
-		}
-	}
-}
-
-
-- (NSPointerArray*) pointerArrayOfLuaStatesForClass:(Class)the_class
-{
-	if(NULL == the_class)
-	{
-		return nil;
-	}
-	return [classToLuaStateMap objectForKey:the_class];
-}
-
-- (lua_State*) firstLuaStateForClass:(Class)the_class
-{
-	if(NULL == the_class)
-	{
-		return NULL;
-	}
-	NSPointerArray* list_of_lua_states = [classToLuaStateMap objectForKey:the_class];
-	if(nil != list_of_lua_states)
-	{
-		return [list_of_lua_states pointerAtIndex:0];
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
-- (bool) isClassDefined:(Class)the_class inLuaState:(lua_State*)lua_state
-{
-	if(NULL == the_class)
-	{
-		return false;
-	}
-	NSPointerArray* list_of_lua_states = [self pointerArrayOfLuaStatesForClass:the_class];
-	if(nil == list_of_lua_states)
-	{
-		return false;
-	}
-	NSUInteger number_of_array_elements = [list_of_lua_states count];
-	
-	for(NSUInteger i = 0; i < number_of_array_elements; i++)
-	{
-		if([list_of_lua_states pointerAtIndex:i] == lua_state)
-		{
-			return true;
+			return (bool)NSHashGet(lua_set, lua_state);
 		}
 	}
 	return false;
 }
 
-// I don't expect this to be useful since there is no way to unregister a class from Objective-C
+
+// Originally, I didn't think this would be useful, but it turns out it is important because of relaunching scenarios
+// like in HybridCoreAnimationScriptability. The OS's memory allocator may recycle memory addresses so there is a possibility
+// I get the same pointer back which causes assertion errors elsewhere in the code. So removing dead lua states from the map is important.
 - (void) removeLuaStateFromMap:(lua_State*)lua_state
 {
-	for(Class current_class in classToLuaStateMap)
+	NSMapTable* selector_map = (NSMapTable*)NSMapGet(luaToClassToSelectorMap, lua_state);
+	if(nil != selector_map)
 	{
-		NSPointerArray* list_of_lua_states = [classToLuaStateMap objectForKey:current_class];
-		NSUInteger number_of_array_elements = [list_of_lua_states count];
-		for(NSUInteger i = number_of_array_elements; i != 0; i--)
+		// Iterate through all selectors
+		NSMapEnumerator selector_map_enumerator = NSEnumerateMapTable(selector_map);
+//		SEL current_selector_key;
+		void* current_selector_key;
+		NSHashTable* current_luaset_value;
+		while(YES==NSNextMapEnumeratorPair(&selector_map_enumerator, &current_selector_key, (void*)&current_luaset_value))
 		{
-			if([list_of_lua_states pointerAtIndex:i-1] == lua_state)
-			{
-				[list_of_lua_states removePointerAtIndex:i-1];
-			}
+			
+			NSHashRemove(current_luaset_value, lua_state);
 		}
+
 	}
+	
+	NSMapRemove(luaToClassToSelectorMap, lua_state);
+	
 }
 
 @end

@@ -294,14 +294,31 @@ static NSString* BridgeSupportController_MergeNodes(NSString* xml_data1, NSStrin
 				{				
 					is_function_alias = true;
 				}
-				// Extract name
-				const char* tagStart = c;
-				for (; *c && *c != '\''; c++);
-				c++;
-				const char* c0 = c;
-				for (; *c && *c != '\''; c++);
+				// Extract name.
+				// Oops. This is really bad. 10.8 shuffled the XML tag order around and this code was foolishly assuming the name='Foo' tag would come first which broke this code. This is even more reason to completely replace the XML parser hopefully so I can completely leverage it instead of doing my own performance optimization tricks.
 				
-				id name = [[NSString alloc] initWithBytes:c0 length:c-c0 encoding:NSUTF8StringEncoding];
+				const char* tagStart = c;
+				
+				// Assuming I will find a name=' tag. Hopefully there won't be value strings with that substring. Yes, this sucks.
+				const char* name_tag_start = strstr(tagStart, "name='");
+				const char* c0 = NULL;
+				id name = nil;
+				
+				if(NULL != name_tag_start)
+				{
+					c = name_tag_start;
+					c += 6; // advance to the actual value for the name='value' key.
+					c0 = c; // save the start position
+					for (; *c && *c != '\''; c++); // advance to the end of the value (denoted by closing ')
+					
+					// save the name
+					name = [[NSString alloc] initWithBytes:c0 length:c-c0 encoding:NSUTF8StringEncoding];
+				}
+				else
+				{
+					// not sure what to do in this case. Setting a pointer to no.
+				}
+				
 				
 				// Move to tag end
 				BOOL foundEndTag = NO;

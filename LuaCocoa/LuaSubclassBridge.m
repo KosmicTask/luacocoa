@@ -30,6 +30,7 @@
 #include "LuaSelectorBridge.h"
 #include "LuaStructBridge.h"
 #include "LuaObjectBridge.h"
+#include "LuaBlockBridge.h" // used for common return-value/out argument implementation
 #import "ObjCRuntimeSupport.h"
 #import "LuaObjectBridge.h"
 
@@ -42,11 +43,68 @@
 //} LuaSubClassBridge_LuaClassProxy;
 
 
+
+#define LUA_SUBCLASS_BRIDGE_IVAR_FOR_ORIGIN_THREAD "luaCocoaOriginThreadWithHardToClashName"
+
+static NSThread* LuaSubclassBridge_GetOriginThreadFromLuaSubclassObject(id the_object);
+static void LuaSubclassBridge_SetOriginThreadFromLuaSubclassObject(NSThread* origin_thread, id the_object);
+
+static void LuaSubclassBridge_InvokeDeallocFinalizeClosureCallback(id self_arg, SEL selector_arg, Class class_type, lua_State* lua_state, LuaFFIClosureUserDataContainer* closure_user_data);
+
+
+// These hold ivars needed to deal with the finalize on the origin thread.
+// These are raw pointers that do not retain in order to avoid resurrection issues.
+@interface LuaCocoaSubclassDataForThreadDellocFinalize : NSObject
+{
+@private
+	void* selfArg; // declaring as void* to avoid resurrection issues with garbage collector
+	SEL selectorArg;
+	Class classType;
+	lua_State* luaState;
+	LuaFFIClosureUserDataContainer* closureUserData;	
+}
+- (id) initWithSelfArg:(id)self_arg 
+	selectorArg:(SEL)selector_arg
+	classType:(Class)class_type
+	luaState:(lua_State*)lua_state
+	closureUserData:(LuaFFIClosureUserDataContainer*)closure_user_data
+;
+
+@end
+
+@implementation LuaCocoaSubclassDataForThreadDellocFinalize
+
+- (id) initWithSelfArg:(id)self_arg 
+	selectorArg:(SEL)selector_arg
+	classType:(Class)class_type
+	luaState:(lua_State*)lua_state
+	closureUserData:(LuaFFIClosureUserDataContainer*)closure_user_data
+{
+	self = [super init];
+	if(nil != self)
+	{
+		selfArg = self_arg;
+		selectorArg = selector_arg;
+		classType = class_type;
+		luaState = lua_state;
+		closureUserData = closure_user_data;
+	}
+	return self;
+}
+
+// Callback for performSelector:onThread:
+- (void) invokeCleanup:(id)the_object
+{
+	LuaSubclassBridge_InvokeDeallocFinalizeClosureCallback(selfArg, selectorArg, classType, luaState, closureUserData);
+}
+
+@end
+
+
 static void LuaSubclassBridge_internalSetLuaStateFromLuaSubclassObject(lua_State* lua_state, id the_object)
 {
 	object_setInstanceVariable(the_object, LUA_SUBCLASS_BRIDGE_IVAR_FOR_STATE_AND_UNIQUE_IDENTIFIER, lua_state);		
 }
-
 
 // Return: Table is on top of the stack.
 // Note: This isn't really an environment table until lua_setfenv() is called on the userdata holding the LuaSubclass object
@@ -117,16 +175,23 @@ void LuaSubclassBridge_InitializeNewLuaObject(id the_object, lua_State* lua_stat
 		return;
 	}
 	
-	if(![[LuaClassDefinitionMap sharedDefinitionMap] isClassDefined:[the_object class] inLuaState:lua_state])
+	// I changed the class definition map to be per-selector to deal with categories. 
+	// Since this is initialization, I just need to know if a Lua state exists for this class.
+	// I use 'alloc' as a placeholder for this case.
+	if(![[LuaClassDefinitionMap sharedDefinitionMap] isSelectorDefined:@selector(alloc) inClass:[the_object class] inLuaState:lua_state])
 	{
 		// This is an invalid Lua state, so I'm going to grab a different one
-		lua_state = [[LuaClassDefinitionMap sharedDefinitionMap] firstLuaStateForClass:[the_object class]];
+		lua_state = [[LuaClassDefinitionMap sharedDefinitionMap] anyLuaStateForSelector:@selector(alloc) inClass:[the_object class]];
 	}
 
 //	[the_object setLuaStateForLuaCocoaProxyObject:lua_state];
 //	LuaSubclassBridge_SetLuaStateFromLuaSubclassObject(lua_state, the_object);
 	// need to avoid infinite recursion
 	LuaSubclassBridge_internalSetLuaStateFromLuaSubclassObject(lua_state, the_object);
+	
+	// I'm concerned about finalizers not being called on the origin thread. So I'm saving the current thread.
+	LuaSubclassBridge_SetOriginThreadFromLuaSubclassObject([NSThread currentThread], the_object);
+	
 	// We need to create an environmental table for the object in Lua which will hold the Lua specifc data.
 	// This will be held in a strong global table.
 	// When the object is dealloc'd/finalized, it will be responsible for cleaning this entry.
@@ -383,6 +448,32 @@ static NSMethodSignature* LuaSubclassBridge_methodSignatureForSelector(id self, 
 }
 */
 
+NSThread* LuaSubclassBridge_GetOriginThreadFromLuaSubclassObject(id the_object)
+{
+	NSThread* origin_thread = NULL;
+	object_getInstanceVariable(the_object, LUA_SUBCLASS_BRIDGE_IVAR_FOR_ORIGIN_THREAD, (void**)&origin_thread);
+	return origin_thread;
+}
+
+
+void LuaSubclassBridge_SetOriginThreadFromLuaSubclassObject(NSThread* origin_thread, id the_object)
+{
+	NSThread* old_origin_thread = LuaSubclassBridge_GetOriginThreadFromLuaSubclassObject(the_object);
+	if([origin_thread isEqualTo:old_origin_thread])
+	{
+		return;
+	}
+	if(nil != old_origin_thread)
+	{
+		CFRelease(old_origin_thread);
+	}
+	object_setInstanceVariable(the_object, LUA_SUBCLASS_BRIDGE_IVAR_FOR_ORIGIN_THREAD, origin_thread);
+	if(nil != origin_thread)
+	{
+		CFRetain(origin_thread);
+	}
+}
+
 
 
 lua_State* LuaSubclassBridge_GetLuaStateFromLuaSubclassObject(id the_object)
@@ -449,13 +540,862 @@ static void LuaSubclassBridge_cleanupLuaCocoaInstance(id self, SEL _cmd)
 	lua_State* lua_state = LuaSubclassBridge_GetLuaStateFromLuaSubclassObject(self);
 	if(NULL != lua_state)
 	{
-		LuaCocoaStrongTable_RemoveLuaSubclassEnvironmentTableInGlobalStrongTable(lua_state, self);		
+		// I need to guard against cases where the Lua state has already been closed.
+		// This is particularly a problem with Obj-C garbage collection where finalize may be invoked some time later.
+		if([[LuaClassDefinitionMap sharedDefinitionMap] isSelectorDefined:_cmd inClass:[self class] inLuaState:lua_state])
+		{
+			LuaCocoaStrongTable_RemoveLuaSubclassEnvironmentTableInGlobalStrongTable(lua_state, self);		
+		}
 	}
 	else
 	{
 		NSLog(@"Warning/AssertionFailure: dealloc/finalize has a NULL lua_State which implies the Lua-side was never properly initialized.");
 	}
 }
+
+void LuaSubclassBridge_ParseFFIArgumentAndPushToLua(unsigned int i, ParseSupportFunction* parse_support, lua_State* lua_state, void** args_from_ffi)
+{
+	ParseSupportArgument* current_parse_support_argument = [parse_support.argumentArray objectAtIndex:i];
+	
+    if(false == current_parse_support_argument.isStructType)
+    {
+        
+        char objc_encoding_type = [current_parse_support_argument.objcEncodingType UTF8String][0];
+        // START COPY AND PASTE HERE
+        switch(objc_encoding_type)
+        {
+            case _C_ID:
+            {
+                id the_argument = *(id*)args_from_ffi[i];
+                LuaObjectBridge_Pushid(lua_state, the_argument);
+                break;
+            }
+            case _C_CLASS:
+            {
+                Class the_argument = *(Class*)args_from_ffi[i];
+                LuaObjectBridge_PushClass(lua_state, the_argument);
+                break;
+            }
+            case _C_SEL:
+            {
+                SEL the_argument = *(SEL*)args_from_ffi[i];
+                LuaSelectorBridge_pushselector(lua_state, the_argument);
+                break;
+            }
+            case _C_CHR:
+            {
+                char the_argument = *(char*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));
+                break;
+            }
+            case _C_UCHR:
+            {
+                unsigned char the_argument = *(unsigned char*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));
+                break;
+            }
+            case _C_SHT:
+            {
+                short the_argument = *(short*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));
+                break;
+            }
+            case _C_USHT:
+            {
+                unsigned short the_argument = *(unsigned short*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));
+                break;
+            }
+            case _C_INT:
+            {
+                int the_argument = *(int*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
+                break;
+            }
+            case _C_UINT:
+            {
+                unsigned int the_argument = *(unsigned int*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
+                break;
+            }
+            case _C_LNG:
+            {
+                long the_argument = *(long*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
+                break;
+            }
+            case _C_ULNG:
+            {
+                unsigned long the_argument = *(unsigned long*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
+                break;
+            }
+            case _C_LNG_LNG:
+            {
+                long long the_argument = *(long long*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
+                break;
+            }
+            case _C_ULNG_LNG:
+            {
+                unsigned long long the_argument = *(unsigned long long*)args_from_ffi[i];
+                lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
+                break;
+            }
+            case _C_FLT:
+            {
+                float the_argument = *(float*)args_from_ffi[i];
+                lua_pushnumber(lua_state, (lua_Number)(the_argument));				
+                break;
+            }
+            case _C_DBL:
+            {
+                double the_argument = *(double*)args_from_ffi[i];
+                lua_pushnumber(lua_state, (lua_Number)(the_argument));				
+                break;
+            }
+            case _C_BOOL:
+            {
+                bool the_argument = *(bool*)args_from_ffi[i];
+                lua_pushboolean(lua_state, the_argument);				
+                break;
+            }
+            case _C_VOID:
+            {
+                // no return value (probably an error if I get here)
+                break;
+            }
+            case _C_CHARPTR:
+            {
+                const char* the_argument = *(const char**)args_from_ffi[i];
+                lua_pushstring(lua_state, (const char*)the_argument);
+                break;
+            }
+            case _C_PTR:
+            {
+                // We might want to look for in/out modifiers, but in the Blocks implementation, the block information is lacking so I just do it.
+                // For consistency, I just do it here too.
+                // Try to dereference pointer to something that is easily used in Lua since getting lightuserdata pointer in Lua isn't easy to do anything with.
+                if([[current_parse_support_argument objcEncodingType] length] <= 1)
+                {
+                    void* the_argument = *(void**)args_from_ffi[i];
+                    lua_pushlightuserdata(lua_state, the_argument);
+                    break;
+                }
+                
+                char pointer_to_objc_encoding_type = [current_parse_support_argument.objcEncodingType UTF8String][1];
+                
+                switch(pointer_to_objc_encoding_type)
+                {
+                    case _C_ID:
+                    {
+                        id* the_argument = *(id**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        LuaObjectBridge_Pushid(lua_state, *the_argument);
+                        break;
+                    }
+                    case _C_CLASS:
+                    {
+                        Class* the_argument = *(Class**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        LuaObjectBridge_PushClass(lua_state, *the_argument);
+                        break;
+                    }
+                    case _C_CHARPTR:
+                    {
+                        const char** the_argument = *(const char***)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushstring(lua_state, *the_argument);
+                        break;
+                    }
+                    case _C_SEL:
+                    {
+                        SEL* the_argument = *(SEL**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        LuaSelectorBridge_pushselector(lua_state, *the_argument);
+                        break;
+                    }
+                    case _C_CHR:
+                    {
+                        char* the_argument = *(char**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));
+                        break;
+                    }
+                    case _C_UCHR:
+                    {
+                        unsigned char* the_argument = *(unsigned char**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));
+                        break;
+                    }
+                    case _C_SHT:
+                    {
+                        short* the_argument = *(short**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));
+                        break;
+                    }
+                    case _C_USHT:
+                    {
+                        unsigned short* the_argument = *(unsigned short**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));
+                        break;
+                    }
+                    case _C_INT:
+                    {
+                        int* the_argument = *(int**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));				
+                        break;
+                    }
+                    case _C_UINT:
+                    {
+                        unsigned int* the_argument = *(unsigned int**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));				
+                        break;
+                    }
+                    case _C_LNG:
+                    {
+                        long* the_argument = *(long**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));				
+                        break;
+                    }
+                    case _C_ULNG:
+                    {
+                        unsigned long* the_argument = *(unsigned long**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));				
+                        break;
+                    }
+                    case _C_LNG_LNG:
+                    {
+                        long long* the_argument = *(long long**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));				
+                        break;
+                    }
+                    case _C_ULNG_LNG:
+                    {
+                        unsigned long long* the_argument = *(unsigned long long**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushinteger(lua_state, (lua_Integer)(*the_argument));				
+                        break;
+                    }
+                    case _C_FLT:
+                    {
+                        float* the_argument = *(float**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushnumber(lua_state, (lua_Number)(*the_argument));				
+                        break;
+                    }
+                    case _C_DBL:
+                    {
+                        double* the_argument = *(double**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushnumber(lua_state, (lua_Number)(*the_argument));				
+                        break;
+                    }
+                    case _C_BOOL:
+                    {
+                        bool* the_argument = *(bool**)args_from_ffi[i];
+                        if(NULL == the_argument)
+                        {
+                            lua_pushnil(lua_state);
+                            break;
+                        }
+                        lua_pushboolean(lua_state, *the_argument);				
+                        break;
+                    }
+                    case _C_PTR:
+                    default:
+                    {
+                        // I'm not going to try to dereference multiple levels.
+                        void* the_argument = *(void**)args_from_ffi[i];
+                        lua_pushlightuserdata(lua_state, the_argument);
+                    }
+                }
+                break;
+            }
+                
+				
+				// compositeType check prevents reaching this case, handled in else
+				/*
+				 case _C_STRUCT_B:
+				 {
+				 
+				 }
+				 */
+            case _C_ATOM:
+            case _C_ARY_B:
+            case _C_UNION_B:
+            case _C_BFLD:
+                
+            default:
+            {
+                // returns
+                //					luaL_error(lua_state, "Unhandled/unimplemented type %c in LuaSubclassBridge_GenericClosureCallback", objc_encoding_type);
+                [NSException raise:@"Unhandled/unimplemented type in LuaSubclassBridge_GenericClosureCallback" format:@"Unhandled/unimplemented type %c in LuaSubclassBridge_GenericClosureCallback: %c", objc_encoding_type];
+            }
+        }
+    }
+    else
+    {
+        // set correct struct metatable on new userdata
+        NSString* struct_type_name = current_parse_support_argument.objcEncodingType;
+        
+        // set correct struct metatable on new userdata
+        
+        NSString* struct_struct_name = ParseSupport_StructureReturnNameFromReturnTypeEncoding(struct_type_name);
+        
+        // BUG:?? struct_struct_name may have a leading underscore on 32-bit ppc
+        NSString* struct_keyname = [ParseSupportStruct keyNameFromStructName:struct_struct_name];
+        
+        // BUG:?? This breaks with the underscore
+        //			size_t size_of_struct = [ParseSupport sizeOfStructureFromStructureName:struct_struct_name];
+        size_t size_of_struct = [ParseSupport sizeOfStructureFromStructureName:struct_keyname];
+        
+        
+        // pushes new userdata on top of stack
+        void* struct_userdata = lua_newuserdata(lua_state, size_of_struct);
+        
+        // I'm confused: The_C_PTR further above requires on *(void**) or chokes.
+        // But the _C_CHARPTR case above needs *(const char**) or it doesn't work.
+        // But this case requires (void*) or I get NULL.
+        void* the_argument = (void*)args_from_ffi[i];
+        
+        memcpy(struct_userdata, the_argument, size_of_struct);
+        
+        // Fetch the metatable for this struct type and apply it to the struct so the Lua scripter can access the fields
+        LuaStructBridge_SetStructMetatableOnUserdata(lua_state, -1, struct_keyname, struct_struct_name);
+    }
+}
+
+bool LuaSubclassBridge_SetFFIReturnValueFromLuaReturnValue(ffi_cif* the_cif, lua_State* lua_state, void* return_result, ParseSupportFunction* parse_support)
+{
+  	bool is_void_return = false;
+	if(FFI_TYPE_VOID == the_cif->rtype->type)
+	{
+		is_void_return = true;
+	}
+	
+	if(false == is_void_return)
+	{
+		int stack_index_return_value = lua_gettop(lua_state);
+        
+		if(FFI_TYPE_STRUCT == the_cif->rtype->type)
+		{
+			void* return_struct_ptr = lua_touserdata(lua_state, stack_index_return_value);
+			memcpy(return_result, return_struct_ptr, the_cif->rtype->size);
+		}
+		else
+		{
+			switch(the_cif->rtype->type)
+			{
+				case FFI_TYPE_INT:
+				case FFI_TYPE_SINT8:
+				case FFI_TYPE_SINT16:
+				case FFI_TYPE_SINT32:
+				case FFI_TYPE_SINT64:
+				{
+					if(lua_isboolean(lua_state, stack_index_return_value))
+					{
+						// Copy the returned value into result. Because the return value of foo()
+						// is smaller than sizeof(long), typecast it to ffi_arg. Use ffi_sarg
+						// instead for signed types.
+						*(ffi_sarg*)return_result = (ffi_sarg)lua_toboolean(lua_state, stack_index_return_value);
+					}
+					else
+					{
+						*(ffi_sarg*)return_result = (ffi_sarg)lua_tointeger(lua_state, stack_index_return_value);
+					}
+					break;
+				}
+				case FFI_TYPE_UINT8:
+				case FFI_TYPE_UINT16:
+				case FFI_TYPE_UINT32:
+				case FFI_TYPE_UINT64:
+				{
+					if(lua_isboolean(lua_state, stack_index_return_value))
+					{
+						// Copy the returned value into result. Because the return value of foo()
+						// is smaller than sizeof(long), typecast it to ffi_arg. Use ffi_sarg
+						// instead for signed types.
+						*(ffi_arg*)return_result = (ffi_arg)lua_toboolean(lua_state, stack_index_return_value);
+					}
+					else
+					{
+						*(ffi_arg*)return_result = (ffi_arg)lua_tointeger(lua_state, stack_index_return_value);
+					}
+					break;
+				}
+                    
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+				case FFI_TYPE_LONGDOUBLE:
+				{	
+					*(ffi_sarg*)return_result = (ffi_sarg)lua_tonumber(lua_state, stack_index_return_value);
+					break;
+				}
+#endif
+					
+				case FFI_TYPE_DOUBLE:
+				case FFI_TYPE_FLOAT:
+				{
+					*(ffi_sarg*)return_result = (ffi_sarg)lua_tonumber(lua_state, stack_index_return_value);
+					break;
+				}
+                    
+				case FFI_TYPE_POINTER:
+				{
+					ParseSupportArgument* return_parse_support_argument = parse_support.returnValue;
+                    
+					char objc_encoding_type = [return_parse_support_argument.objcEncodingType UTF8String][0];
+					
+					switch(objc_encoding_type)
+					{
+						case _C_ID:
+						case _C_CLASS:
+						{
+							if(lua_isnil(lua_state, stack_index_return_value))
+							{
+								*(id*)return_result = nil;
+							}
+							else
+							{
+								// Will auto-coerce numbers, strings, tables to Cocoa objects
+								id the_object = LuaObjectBridge_topropertylist(lua_state, stack_index_return_value);
+								*(id*)return_result = the_object;
+							}
+							break;
+						}
+						case _C_CHARPTR:
+						{
+							if(lua_isstring(lua_state, stack_index_return_value))
+							{
+								*(const char**)return_result = (const char*)lua_tostring(lua_state, stack_index_return_value);
+							}
+							else if(LuaObjectBridge_isnsstring(lua_state, stack_index_return_value))
+							{
+								*(const char**)return_result = [LuaObjectBridge_tonsstring(lua_state, stack_index_return_value) UTF8String];
+							}
+							else
+							{
+								*(const char**)return_result = NULL;
+							}
+							break;
+						}
+						case _C_SEL:
+						{
+							*(SEL*)return_result = LuaSelectorBridge_toselector(lua_state, stack_index_return_value);
+							break;
+						}
+							
+						case _C_PTR:
+						default:
+						{
+							// This might be problematic if the userdata pointer is a Lua-only pointer
+							// (not a generic lightuserdata pointer that can be useful outside of Lua)
+							// especially in the cases where the caller is Obj-C.
+							*(void**)return_result = lua_touserdata(lua_state, stack_index_return_value);
+						}
+					}
+					break;
+				}
+				default:
+				{
+					NSLog(@"Unhandled return type in LuaSubclassBridge_GenericClsureCallback() (also used for Blocks)");
+				}
+			}
+			
+#ifdef __BIG_ENDIAN__
+			// Seen in JSCocoa
+			// As ffi always uses a sizeof(long) return value (even for chars and shorts), do some shifting
+			char type_encoding_char = [parse_support.returnValue.objcEncodingType UTF8String][0];
+			int data_size = ObjCRuntimeSupport_SizeOfTypeEncoding(type_encoding_char);
+			int padded_size = sizeof(long);
+			long v; 
+			if(data_size > 0 && data_size < padded_size && padded_size == 4)
+			{
+				v = *(long*)return_result;
+				v = CFSwapInt32(v);
+				*(long*)return_result = v;
+			}
+#endif	
+		}
+		
+	}
+    return is_void_return;
+}
+
+void LuaSubclassBridge_ProcessExtraReturnValuesFromLuaAsPointerOutArguments(lua_State* lua_state, void** args_from_ffi, ParseSupportFunction* parse_support, int start_parse_support_index, int start_lua_return_index)
+{
+	
+	int j = start_lua_return_index;
+	
+	// Start at 1 instead of 0 because we want to skip the block argument
+	for(int i=start_parse_support_index ; i<[parse_support.argumentArray count]; i++)
+	{
+		ParseSupportArgument* current_parse_support_argument = [parse_support.argumentArray objectAtIndex:i];
+		if(false == current_parse_support_argument.isStructType)
+		{
+			if([[current_parse_support_argument objcEncodingType] length] >= 2 
+			   && _C_PTR == [current_parse_support_argument.objcEncodingType UTF8String][0])
+			{
+				char objc_encoding_type = [current_parse_support_argument.objcEncodingType UTF8String][1];
+				
+				switch(objc_encoding_type)
+				{
+					case _C_BOOL:
+					{
+						_Bool* the_argument = *(_Bool**)args_from_ffi[i];
+
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = (_Bool)lua_toboolean(lua_state, j);
+						}
+						break;
+					}
+					case _C_CHR:
+					{
+						int8_t* the_argument = *(int8_t**)args_from_ffi[i];
+
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_SHT:
+					{
+						int16_t* the_argument = *(int16_t**)args_from_ffi[i];
+
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_INT:
+					{    
+						int* the_argument = *(int**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;			
+					}
+					case _C_LNG:
+					{
+						long* the_argument = *(long**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_LNG_LNG:
+					{
+						long long* the_argument = *(long long**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_UCHR:
+					{
+						uint8_t* the_argument = *(uint8_t**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_USHT:
+					{
+						uint16_t* the_argument = *(uint16_t**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_UINT:
+					{
+						unsigned int* the_argument = *(unsigned int**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_ULNG:
+					{
+						unsigned long* the_argument = *(unsigned long**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_ULNG_LNG:
+					{
+						unsigned long long* the_argument = *(unsigned long long**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tointeger(lua_state, j);
+						}
+						break;
+					}
+					case _C_DBL:
+					{
+						double* the_argument = *(double**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tonumber(lua_state, j);
+						}
+						break;
+					}
+					case _C_FLT:
+					{
+						float* the_argument = *(float**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = lua_tonumber(lua_state, j);
+						}
+						break;
+					}
+						
+					case _C_STRUCT_B:
+					{
+						void** the_argument = *(void***)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							// untested
+							*the_argument = lua_touserdata(lua_state, j);
+						}
+						break;
+					}
+						
+					case _C_ID:
+					{
+						id* the_argument = *(id**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = LuaObjectBridge_toid(lua_state, j);
+						}
+						break;
+					}
+					case _C_CLASS:
+					{
+						Class* the_argument = *(Class**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = LuaObjectBridge_toid(lua_state, j);
+						}
+						break;
+					}
+					case _C_CHARPTR:
+					{
+						char** the_argument = *(char***)args_from_ffi[i];
+
+						// I don't expect this to work at all
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							const char* the_string = lua_tostring(lua_state, j);
+							size_t length_of_string = strlen(the_string) + 1; // add one for \0
+							
+							*the_argument = alloca(sizeof(length_of_string));
+							strlcpy(*the_argument, the_string, length_of_string);
+						}
+						break;
+					}
+					case _C_SEL:
+					{
+						SEL* the_argument = *(SEL**)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							*the_argument = LuaSelectorBridge_toselector(lua_state, j);
+						}
+						break;
+					}
+						
+					case _C_PTR:
+					default:
+					{
+						void** the_argument = *(void***)args_from_ffi[i];
+						
+						if(NULL == the_argument || lua_isnil(lua_state, j))
+						{
+							the_argument = NULL;
+						}
+						else
+						{
+							// untested
+							*the_argument = lua_touserdata(lua_state, j);
+						}
+						break;
+					}
+				}
+				j++; // assume we used up this return value, move on to the next return value
+			}
+		}
+	}
+}
+
 
 // Invoking the closure transfers control to this function.
 static void LuaSubclassBridge_GenericClosureCallback(ffi_cif* the_cif, void* return_result, void** args_from_ffi, void* user_data)
@@ -464,8 +1404,7 @@ static void LuaSubclassBridge_GenericClosureCallback(ffi_cif* the_cif, void* ret
 	
 	LuaFFIClosureUserDataContainer* closure_user_data = (LuaFFIClosureUserDataContainer*)user_data;
 	unsigned int number_of_arguments = the_cif->nargs;
-	lua_State* lua_state = closure_user_data->luaState;
-	int stack_top = lua_gettop(lua_state);
+
 	
 	// I actually expect a ParseSupportMethod, but I don't think I need any specific APIs from it.
 	/*
@@ -476,18 +1415,52 @@ static void LuaSubclassBridge_GenericClosureCallback(ffi_cif* the_cif, void* ret
 	Class the_class = closure_user_data->theClass;
 	unsigned int i = 0;
 
+	lua_State* lua_state = closure_user_data->luaState;
+
+	int stack_top = 0;
 
 	if([closure_user_data->parseSupport isKindOfClass:[ParseSupportMethod class]])
 	{
 		id the_receiver = *(id*)args_from_ffi[0];
 		
 		SEL the_selector = *(SEL*)args_from_ffi[1];
+		
+		
+		// I need to guard against cases where the Lua state has already been closed.
+		if(![[LuaClassDefinitionMap sharedDefinitionMap] isSelectorDefined:the_selector inClass:the_class inLuaState:lua_state])
+		{
+			// So there are different ways to hit this problem.
+			// - The user closed the script, but due to some asynchronous method, this callback was invoked later.
+			// - The user relaunched a script. They only need the implementation definition which is constant against relaunches, so calling a different lua state with the same implementation should work (provided there is no specific lua_state/per-instance info that needs to survive).
+			// - The user screwed up.
+			// Since there is a valid case of this, I will try to fetch a sibling lua state.
+			lua_state = [[LuaClassDefinitionMap sharedDefinitionMap] anyLuaStateForSelector:the_selector inClass:the_class];
+			if(NULL == lua_state)
+			{
+				NSLog(@"lua_State for subclass method invocation has been closed/removed. Aborting call.");
+				
+				// Abort function.
+				return;
+				
+			}
+			else
+			{
+				NSLog(@"lua_State for subclass method invocation has been closed/removed. Using alternative lua_State.");
+			}
+		}
+
 		const char* selector_name = sel_getName(the_selector);
 		size_t buffer_length = strlen(selector_name) + 1;
 		char underscored_function_name[buffer_length];
 		ObjectSupport_ConvertObjCStringToUnderscoredString(underscored_function_name, selector_name, buffer_length);
 		
+		
+		stack_top = lua_gettop(lua_state);
 
+		
+		
+		
+		
 		ParseSupportArgument* first_parse_support_argument = [parse_support.argumentArray objectAtIndex:0];
 		char objc_encoding_type = [first_parse_support_argument.objcEncodingType UTF8String][0];
 		if(_C_ID == objc_encoding_type)
@@ -558,363 +1531,80 @@ static void LuaSubclassBridge_GenericClosureCallback(ffi_cif* the_cif, void* ret
 	 }
 	 */	
 	
-	
-	
+	// We already pushed self on the stack before this call.
+	// Minus 1 for self, Plus 1 for function.
+	lua_checkstack(lua_state, [parse_support.argumentArray count]);
+
 		
 //    for(ParseSupportArgument* current_parse_support_argument = [parse_support.argumentArray objectAtIndex:i]; i<[parse_support.argumentArray count]; current_parse_support_argument = [parse_support.argumentArray objectAtIndex:i], i++)
 	for(i=2 ; i<[parse_support.argumentArray count]; i++)
 //	for(ParseSupportArgument* current_parse_support_argument in parse_support.argumentArray)
 	{
-		ParseSupportArgument* current_parse_support_argument = [parse_support.argumentArray objectAtIndex:i];
-		if(false == current_parse_support_argument.isStructType)
-		{
-			
-			char objc_encoding_type = [current_parse_support_argument.objcEncodingType UTF8String][0];
-			// START COPY AND PASTE HERE
-			switch(objc_encoding_type)
-			{
-				case _C_ID:
-				{
-					id the_argument = *(id*)args_from_ffi[i];
-					LuaObjectBridge_Pushid(lua_state, the_argument);
-					break;
-				}
-				case _C_CLASS:
-				{
-					Class the_argument = *(Class*)args_from_ffi[i];
-					LuaObjectBridge_PushClass(lua_state, the_argument);
-					break;
-				}
-				case _C_SEL:
-				{
-					SEL the_argument = *(SEL*)args_from_ffi[i];
-					LuaSelectorBridge_pushselector(lua_state, the_argument);
-					break;
-				}
-				case _C_CHR:
-				{
-					char the_argument = *(char*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));
-					break;
-				}
-				case _C_UCHR:
-				{
-					unsigned char the_argument = *(unsigned char*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));
-					break;
-				}
-				case _C_SHT:
-				{
-					short the_argument = *(short*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));
-					break;
-				}
-				case _C_USHT:
-				{
-					unsigned short the_argument = *(unsigned short*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));
-					break;
-				}
-				case _C_INT:
-				{
-					int the_argument = *(int*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
-					break;
-				}
-				case _C_UINT:
-				{
-					unsigned int the_argument = *(unsigned int*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
-					break;
-				}
-				case _C_LNG:
-				{
-					long the_argument = *(long*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
-					break;
-				}
-				case _C_ULNG:
-				{
-					unsigned long the_argument = *(unsigned long*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
-					break;
-				}
-				case _C_LNG_LNG:
-				{
-					long long the_argument = *(long long*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
-					break;
-				}
-				case _C_ULNG_LNG:
-				{
-					unsigned long long the_argument = *(unsigned long long*)args_from_ffi[i];
-					lua_pushinteger(lua_state, (lua_Integer)(the_argument));				
-					break;
-				}
-				case _C_FLT:
-				{
-					float the_argument = *(float*)args_from_ffi[i];
-					lua_pushnumber(lua_state, (lua_Number)(the_argument));				
-					break;
-				}
-				case _C_DBL:
-				{
-					double the_argument = *(double*)args_from_ffi[i];
-					lua_pushnumber(lua_state, (lua_Number)(the_argument));				
-					break;
-				}
-				case _C_BOOL:
-				{
-					bool the_argument = *(bool*)args_from_ffi[i];
-					lua_pushboolean(lua_state, the_argument);				
-					break;
-				}
-				case _C_VOID:
-				{
-					// no return value (probably an error if I get here)
-					break;
-				}
-				case _C_PTR:
-				{
-					void* the_argument = *(void**)args_from_ffi[i];
-					lua_pushlightuserdata(lua_state, the_argument);
-					break;
-				}
-				case _C_CHARPTR:
-				{
-					const char* the_argument = *(const char**)args_from_ffi[i];
-					lua_pushstring(lua_state, (const char*)the_argument);
-					break;
-				}
-				
-				// compositeType check prevents reaching this case, handled in else
-				/*
-				 case _C_STRUCT_B:
-				 {
-				 
-				 }
-				 */
-				case _C_ATOM:
-				case _C_ARY_B:
-				case _C_UNION_B:
-				case _C_BFLD:
-					
-				default:
-				{
-					// returns
-					luaL_error(lua_state, "Unhandled/unimplemented type %c in LuaSubclassBridge_GenericClosureCallback", objc_encoding_type);
-				}
-			}
-		}
-		else
-		{
-			// set correct struct metatable on new userdata
-			NSString* struct_type_name = current_parse_support_argument.objcEncodingType;
-			
-			// set correct struct metatable on new userdata
-			
-			NSString* struct_struct_name = ParseSupport_StructureReturnNameFromReturnTypeEncoding(struct_type_name);
-			
-			// BUG:?? struct_struct_name may have a leading underscore on 32-bit ppc
-			NSString* struct_keyname = [ParseSupportStruct keyNameFromStructName:struct_struct_name];
-
-			// BUG:?? This breaks with the underscore
-//			size_t size_of_struct = [ParseSupport sizeOfStructureFromStructureName:struct_struct_name];
-			size_t size_of_struct = [ParseSupport sizeOfStructureFromStructureName:struct_keyname];
-			
-			
-			// pushes new userdata on top of stack
-			void* struct_userdata = lua_newuserdata(lua_state, size_of_struct);
-			
-			// I'm confused: The_C_PTR further above requires on *(void**) or chokes.
-			// But the _C_CHARPTR case above needs *(const char**) or it doesn't work.
-			// But this case requires (void*) or I get NULL.
-			void* the_argument = (void*)args_from_ffi[i];
-
-			memcpy(struct_userdata, the_argument, size_of_struct);
-
-			// Fetch the metatable for this struct type and apply it to the struct so the Lua scripter can access the fields
-			LuaStructBridge_SetStructMetatableOnUserdata(lua_state, -1, struct_keyname, struct_struct_name);
-		}
-
+		LuaSubclassBridge_ParseFFIArgumentAndPushToLua(i, parse_support, lua_state, args_from_ffi);
 	}
 	
-
-	
-	
-	
-	
-	// FIXME: Handle out arguments as multiple return values
-#if 0
-	the_error = lua_pcall(lua_state, number_of_arguments-1, 1, 0);
-	if(the_error)
+	// Not sure, pcall or call
+#if 1
+	int the_error = lua_pcall(lua_state, number_of_arguments-1, LUA_MULTRET, 0);
+	if(0 != the_error)
 	{
-		return luaL_error(lua_state, "lua/ffi_prep_closure invocation failed: %s", lua_tostring(lua_state, -1))
+		// returns immediately
+//		luaL_error(lua_state, "lua/ffi_prep_closure invocation failed: %s", lua_tostring(lua_state, -1));
+		[NSException raise:@"lua/ffi_prep_closure invocation failed in LuaSubclassBridge callback:" format:@"lua/ffi_prep_closure invocation failed in LuaSubclassBridge callback: %s", lua_tostring(lua_state, -1)];
 //		lua_pop(lua_state, 1); /* pop error message from stack */
+		return;
 	}
+
 #else
-	lua_call(lua_state, number_of_arguments-1, 1);
+	lua_call(lua_state, number_of_arguments-1, LUA_MULTRET);
 
 #endif
 	
 	
+	// Now that we just called Lua, figure out how many return values were set. 
+	// Extra return values in addition to the C/Signature return value denotes out-values.
+	int number_of_return_args = lua_gettop(lua_state);
+
+	// Set the return FFI value from the first Lua return value
+	bool is_void_return = LuaSubclassBridge_SetFFIReturnValueFromLuaReturnValue(the_cif, lua_state, return_result, parse_support);	
 	
+	/*  
+	 I am reusing the same function for subclasses and blocks for dealing with out-values.
+	 The bridge support data is missing out modifiers.
+	 The base case I'm using is
+	 array = LuaCocoa.toCocoa({"bar", "foo", "fee"})
+	 array:enumerateObjectsUsingBlock_(function(id_obj, int_index, boolptr_stop) 
+	 print("in block callback of array:enumerateObjectsUsingBlock_ ", id_obj, int_index, boolptr_stop)
+	 boolptr_stop=true
+	 end
+	 )
+	 The BOOL* stop is a problem.
+	 I am going to assume all pointer values will be out-values.
+	 I will use multiple return values to map to the pointers.
+	 There cannot be any holes in the return values for each pointer.
+	 */
 	
-	
-	
-	
-	
-	bool is_void_return = false;
-	if(FFI_TYPE_VOID == the_cif->rtype->type)
+	bool has_pointer_out_values = false;
+	int j=0; // lua index of the return value we are looking at
+	if(true == is_void_return && number_of_return_args > 0)
 	{
-		is_void_return = true;
+		j=stack_top+1;
+		has_pointer_out_values = true;
+	}
+	else if(false == is_void_return && number_of_return_args > 1)
+	{
+		has_pointer_out_values = true;
+		j=stack_top+2;
 	}
 	
-	if(false == is_void_return)
+	if(true == has_pointer_out_values)
 	{
-		int stack_index_return_value = lua_gettop(lua_state);
-
-		if(FFI_TYPE_STRUCT == the_cif->rtype->type)
-		{
-			void* return_struct_ptr = lua_touserdata(lua_state, stack_index_return_value);
-			memcpy(return_result, return_struct_ptr, the_cif->rtype->size);
-		}
-		else
-		{
-			switch(the_cif->rtype->type)
-			{
-				case FFI_TYPE_INT:
-				case FFI_TYPE_SINT8:
-				case FFI_TYPE_SINT16:
-				case FFI_TYPE_SINT32:
-				case FFI_TYPE_SINT64:
-				{
-					if(lua_isboolean(lua_state, stack_index_return_value))
-					{
-						// Copy the returned value into result. Because the return value of foo()
-						// is smaller than sizeof(long), typecast it to ffi_arg. Use ffi_sarg
-						// instead for signed types.
-						*(ffi_sarg*)return_result = (ffi_sarg)lua_toboolean(lua_state, stack_index_return_value);
-					}
-					else
-					{
-						*(ffi_sarg*)return_result = (ffi_sarg)lua_tointeger(lua_state, stack_index_return_value);
-					}
-					break;
-				}
-				case FFI_TYPE_UINT8:
-				case FFI_TYPE_UINT16:
-				case FFI_TYPE_UINT32:
-				case FFI_TYPE_UINT64:
-				{
-					if(lua_isboolean(lua_state, stack_index_return_value))
-					{
-						// Copy the returned value into result. Because the return value of foo()
-						// is smaller than sizeof(long), typecast it to ffi_arg. Use ffi_sarg
-						// instead for signed types.
-						*(ffi_arg*)return_result = (ffi_arg)lua_toboolean(lua_state, stack_index_return_value);
-					}
-					else
-					{
-						*(ffi_arg*)return_result = (ffi_arg)lua_tointeger(lua_state, stack_index_return_value);
-					}
-					break;
-				}
-				
-			#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
-				case FFI_TYPE_LONGDOUBLE:
-				{	
-					*(ffi_sarg*)return_result = (ffi_sarg)lua_tonumber(lua_state, stack_index_return_value);
-					break;
-				}
-			#endif
-					
-				case FFI_TYPE_DOUBLE:
-				case FFI_TYPE_FLOAT:
-				{
-					*(ffi_sarg*)return_result = (ffi_sarg)lua_tonumber(lua_state, stack_index_return_value);
-					break;
-				}
-										
-				case FFI_TYPE_POINTER:
-				{
-					ParseSupportArgument* return_parse_support_argument = parse_support.returnValue;
-
-					char objc_encoding_type = [return_parse_support_argument.objcEncodingType UTF8String][0];
-					
-					switch(objc_encoding_type)
-					{
-						case _C_ID:
-						case _C_CLASS:
-						{
-							if(lua_isnil(lua_state, stack_index_return_value))
-							{
-								*(id*)return_result = nil;
-							}
-							else
-							{
-								// Will auto-coerce numbers, strings, tables to Cocoa objects
-								id the_object = LuaObjectBridge_topropertylist(lua_state, stack_index_return_value);
-								*(id*)return_result = the_object;
-							}
-							break;
-						}
-						case _C_CHARPTR:
-						{
-							if(lua_isstring(lua_state, stack_index_return_value))
-							{
-								*(const char**)return_result = (const char*)lua_tostring(lua_state, stack_index_return_value);
-							}
-							else if(LuaObjectBridge_isnsstring(lua_state, stack_index_return_value))
-							{
-								*(const char**)return_result = [LuaObjectBridge_tonsstring(lua_state, stack_index_return_value) UTF8String];
-							}
-							else
-							{
-								*(const char**)return_result = NULL;
-							}
-							break;
-						}
-						case _C_SEL:
-						{
-							*(SEL*)return_result = LuaSelectorBridge_toselector(lua_state, stack_index_return_value);
-							break;
-						}
-							
-						case _C_PTR:
-						default:
-						{
-							// This might be problematic if the userdata pointer is a Lua-only pointer
-							// (not a generic lightuserdata pointer that can be useful outside of Lua)
-							// especially in the cases where the caller is Obj-C.
-							*(void**)return_result = lua_touserdata(lua_state, stack_index_return_value);
-						}
-					}
-					break;
-				}
-				default:
-				{
-					NSLog(@"Unhandled return type in LuaSubclassBridge_GenericClsureCallback()");
-				}
-			}
-			
-#ifdef __BIG_ENDIAN__
-			// Seen in JSCocoa
-			// As ffi always uses a sizeof(long) return value (even for chars and shorts), do some shifting
-			char type_encoding_char = [parse_support.returnValue.objcEncodingType UTF8String][0];
-			int data_size = ObjCRuntimeSupport_SizeOfTypeEncoding(type_encoding_char);
-			int padded_size = sizeof(long);
-			long v; 
-			if(data_size > 0 && data_size < padded_size && padded_size == 4)
-			{
-				v = *(long*)return_result;
-				v = CFSwapInt32(v);
-				*(long*)return_result = v;
-			}
-#endif	
-		}
-		
-	}	
+		// Start at 2 instead of 0 because we want to skip the method and selector arguments
+		LuaSubclassBridge_ProcessExtraReturnValuesFromLuaAsPointerOutArguments(lua_state, args_from_ffi, parse_support, 2, j);
+	}
+	
+	
+	
 	
 	lua_settop(lua_state, stack_top); // pop the string and the container
 
@@ -1038,23 +1728,19 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod2(lua_State* lua_state, 
 #endif
 
 // Invoking the closure transfers control to this function.
-static void LuaSubclassBridge_DeallocFinalizeClosureCallback(ffi_cif* cif_ptr, void* return_result, void** method_args, void* user_data)
+void LuaSubclassBridge_InvokeDeallocFinalizeClosureCallback(id self_arg, SEL selector_arg, Class class_type, lua_State* lua_state, LuaFFIClosureUserDataContainer* closure_user_data)
 {
-	
-	
-	if (NO) NSLog(@"LuaSubclassBridge_DeallocFinalizeClosureCallback");
-	
-	
-	// Access the arguments to be sent to foo().
-	id self_arg = *(id*)method_args[0];
-	SEL selector_arg = *(SEL*)method_args[1];
-	lua_State* lua_state = LuaSubclassBridge_GetLuaStateFromLuaSubclassObject(self_arg);
-	LuaFFIClosureUserDataContainer* closure_user_data = (LuaFFIClosureUserDataContainer*)user_data;
-
-	if (NO) NSLog(@"self:%@, userdata_class:%@", self_arg, NSStringFromClass(closure_user_data->theClass));
+	// We need to be very careful when in a finalizer. 
+	// For example, we don't want to do stuff on self that would trigger a resurrection error.
+	// So the operations here only use the pointer for storing and hashing in maps which should be fine.
 	if(NULL != lua_state)
 	{
-		LuaCocoaStrongTable_RemoveLuaSubclassEnvironmentTableInGlobalStrongTable(lua_state, self_arg);		
+		// I need to guard against cases where the Lua state has already been closed.
+		// This is particularly a problem with Obj-C garbage collection where finalize may be invoked some time later.
+		if([[LuaClassDefinitionMap sharedDefinitionMap] isSelectorDefined:selector_arg inClass:class_type inLuaState:lua_state])
+		{
+			LuaCocoaStrongTable_RemoveLuaSubclassEnvironmentTableInGlobalStrongTable(lua_state, self_arg);
+		}
 	}
 	else
 	{
@@ -1070,6 +1756,73 @@ static void LuaSubclassBridge_DeallocFinalizeClosureCallback(ffi_cif* cif_ptr, v
 //	NSLog(@"super userdata:%@, super=%@", NSStringFromClass((Class)closure_user_data->parseSupport), class_getSuperclass(((Class)closure_user_data->parseSupport)));
 //	struct objc_super super_data = { self_arg, parent_class };
 
+	/* Question: Should the call to super be here or in the original background thread? */
+/*	
+	// This was tricky. Dynamically asking for the super class of the self object doesn't work for deep subclasses,
+	// because you get into an infinite loop problem when calling intermediate super's.
+	// In the super method, the self-object is still the same, and the super is relative to that original object,
+	// so it stops traversing upward and gets stuck in an infinite loop.
+	// My solution is to attach the class that this method/closure was created for as userdata,
+	// and then use the super of that class. This should always provide me the correct class.
+	struct objc_super super_data = { self_arg, class_getSuperclass(closure_user_data->theClass) };
+
+	objc_msgSendSuper(&super_data, selector_arg);
+*/		
+}
+
+static void LuaSubclassBridge_DeallocFinalizeClosureCallback(ffi_cif* the_cif, void* return_result, void** method_args, void* user_data)
+{	
+	// TODO: Add some kind of macro like LUA_LOCK or delegate or block system that users can define to validate if the lua_State is still alive/valid
+	// so we can bailout if need be.
+	// Example use case: You have a script reloading feature like HybridCoreAnimationScriptability where the lua_State* can get closed and reopened
+	// without quiting the app. You do a asynchronous network connection which has a block completion handler like the Game Center APIs.
+	// You close/reload your script before the network returns the data and triggers your completion handler.
+	// The block is still alive on the Obj-C side, so this gets invoked. We have no general way of knowing that the lua_State is no longer good.
+	// VALIDATE_LUA_STATE([closure_user_data luaState)
+	
+	
+	// Because Lua is not compiled with thread locking by default,
+	// we must take care to prevent calling Lua back on a different thread.
+	// When the instance is created, we will get the current thread and presume this is the thread that is safe to call Lua back on.
+	// TODO: Add define to disable this in case somebody does compile Lua with locking enabled and wants to try this.
+	
+	
+	// Access the arguments to be sent to foo().
+	id self_arg = *(id*)method_args[0];
+	SEL selector_arg = *(SEL*)method_args[1];
+	Class class_type = [self_arg class];
+	lua_State* lua_state = LuaSubclassBridge_GetLuaStateFromLuaSubclassObject(self_arg);
+	LuaFFIClosureUserDataContainer* closure_user_data = (LuaFFIClosureUserDataContainer*)user_data;
+	
+	NSThread* origin_thread = LuaSubclassBridge_GetOriginThreadFromLuaSubclassObject(self_arg);
+
+	// Avoid calling dispatch_sync if I don't need to otherwise I deadlock.
+	if([origin_thread isEqualTo:[NSThread currentThread]])
+	{
+		LuaSubclassBridge_InvokeDeallocFinalizeClosureCallback(self_arg, selector_arg, class_type, lua_state, closure_user_data);
+	}
+	else
+	{
+		NSLog(@"Block is not being called back on the same thread it was created.");
+		// We don't want to block the thread execution. Fortunately, since dealloc/finalize are simple enough and don't return anything,
+		// we can extract out the information we need here.
+		LuaCocoaSubclassDataForThreadDellocFinalize* thread_callback = [[LuaCocoaSubclassDataForThreadDellocFinalize alloc] 
+			initWithSelfArg:self_arg 
+			selectorArg:selector_arg
+			classType:class_type
+			luaState:lua_state
+			closureUserData:closure_user_data
+		];
+																		
+		[thread_callback performSelector:@selector(invokeCleanup:) onThread:origin_thread withObject:nil waitUntilDone:NO]; 
+		[thread_callback release];
+	}
+
+	// Release the NSThread in the hidden ivar by using the setter. (It will call CFRelease for us.)
+	LuaSubclassBridge_SetOriginThreadFromLuaSubclassObject(nil, self_arg);
+	
+	/* Question: Should the call to super be here or in the original background thread? */
+	
 	// This was tricky. Dynamically asking for the super class of the self object doesn't work for deep subclasses,
 	// because you get into an infinite loop problem when calling intermediate super's.
 	// In the super method, the self-object is still the same, and the super is relative to that original object,
@@ -1081,6 +1834,7 @@ static void LuaSubclassBridge_DeallocFinalizeClosureCallback(ffi_cif* cif_ptr, v
 	objc_msgSendSuper(&super_data, selector_arg);
 		
 }
+
 
 static IMP LuaSubclassBridge_CreateAndSetFFIClosureForDeallocFinalize(lua_State* lua_state, Class the_class, const char* method_name_in_objc, SEL the_selector, int stack_index_of_userdata)
 {
@@ -1295,15 +2049,14 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 {
 #warning "FIXME: Need clue as to whether class or instance method"
 	// Probably could optimize. Parse support is probably doing a lot more than we need.
-	ParseSupportMethod* parse_support = [[[ParseSupportMethod alloc] 
-					  initWithClassName:NSStringFromClass(the_class)
+	ParseSupportMethod* parse_support = [ParseSupportMethod 
+					  parseSupportMethodFromClassName:NSStringFromClass(the_class)
 					  methodName:[NSString stringWithUTF8String:method_name_in_objc] 
 					  isInstance:false
 					  theReceiver:the_class
 					  isClassMethod:false
 					  stringMethodSignature:method_signature
-					  ] 
-					 autorelease];
+					  ];
 	
 	if(NULL != return_parse_support)
 	{
@@ -1450,11 +2203,7 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 	if(parse_support.returnValue.isStructType)
 	{
 		used_dynamic_memory_for_return_type = true;
-		
-		if(size_of_real_return > 0 && false == is_void_return)
-		{
-			real_return_ptr = (ffi_type*)calloc(size_of_real_return, sizeof(int8_t));
-		}
+
 		if(size_of_flattened_return > 0 && false == is_void_return)
 		{
 			flattened_return_ptr = (ffi_type**)calloc(size_of_flattened_return, sizeof(int8_t));
@@ -1469,17 +2218,9 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 	// Watch out! ffi_type_for_args may return a different pointer which is bad if you malloc'd memory.
 	FFISupport_ParseSupportFunctionArgumentsToFFIType(parse_support, custom_type_args_ptr, &real_args_ptr, flattened_args_ptr);
 
-	// Watch out! ffi_type_for_args may return a different pointer which is bad if you malloc'd memory.
-	if(parse_support.returnValue.isStructType)
-	{
-		
-	}
-	else
-	{
-		free(real_return_ptr);
-		real_return_ptr = NULL;
-	}
-	// Watch out! ffi_type_for_args may return a different pointer which is bad if you malloc'd memory.
+
+	// Based on the bug found by Fjolnir, I think this is wrong.
+	// I think the pointer should be NULL to be set by FFISupport_ParseSupportFunctionReturnValueToFFIType.
 	FFISupport_ParseSupportFunctionReturnValueToFFIType(parse_support, custom_type_return_ptr, &real_return_ptr, flattened_return_ptr);
 
 	// Prepare the ffi_cif structure.
@@ -1501,6 +2242,13 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 			NSLog(@"ffi_prep_cif failed with unknown error for function: %@", parse_support.keyName);			
 			
 		}
+		free(flattened_return_ptr);
+		free(custom_type_return_ptr);
+		free(custom_type_args_ptr);
+		free(flattened_args_ptr);
+		free(real_args_ptr);
+		free(cif_ptr);
+
 		return false;
 	}
 	
@@ -1512,6 +2260,13 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 		// Check errno and handle the error.
 		
 		NSLog(@"mmap failed for ffi_closure");
+		free(flattened_return_ptr);
+		free(custom_type_return_ptr);
+		free(custom_type_args_ptr);
+		free(flattened_args_ptr);
+		free(real_args_ptr);
+		free(cif_ptr);
+		
 		return false;
 	}
 	
@@ -1529,11 +2284,13 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 	// creates a new userdata and leaves it on the stack
 	LuaFFIClosureUserDataContainer* lua_ffi_closure_user_data;
 	
-	// Make sure the real_return_ptr only gets added to the struct if it is dynamic memory.
+	// Make sure the return pointers only get added to the struct if it is dynamic memory.
 	// Otherwise, the destructor will attempt to call free() on memory that I don't own which is bad.
 	if(true == used_dynamic_memory_for_return_type)
 	{
-		lua_ffi_closure_user_data = LuaFFIClosure_CreateNewLuaFFIClosure(lua_state, cif_ptr, real_args_ptr, flattened_args_ptr, custom_type_args_ptr, real_return_ptr, flattened_return_ptr, custom_type_return_ptr, imp_closure, parse_support, the_class);
+		// Based on the bug found by Fjolnir, real_return_ptr needs to be NULL because it is always assigned from something else.
+		// I think the pointer should be NULL to be set by FFISupport_ParseSupportFunctionReturnValueToFFIType.
+		lua_ffi_closure_user_data = LuaFFIClosure_CreateNewLuaFFIClosure(lua_state, cif_ptr, real_args_ptr, flattened_args_ptr, custom_type_args_ptr, NULL, flattened_return_ptr, custom_type_return_ptr, imp_closure, parse_support, the_class);
 	}
 	else
 	{
@@ -1569,6 +2326,13 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 		}
 		munmap(imp_closure, sizeof(imp_closure));
 
+		free(flattened_return_ptr);
+		free(custom_type_return_ptr);
+		free(custom_type_args_ptr);
+		free(flattened_args_ptr);
+		free(real_args_ptr);
+		free(cif_ptr);
+
 		return NULL;
 	}
 	
@@ -1579,6 +2343,13 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 		NSLog(@"mprotect for ffi_closure failed");
 		munmap(imp_closure, sizeof(imp_closure));
 
+		free(flattened_return_ptr);
+		free(custom_type_return_ptr);
+		free(custom_type_args_ptr);
+		free(flattened_args_ptr);
+		free(real_args_ptr);
+		free(cif_ptr);
+
 		return NULL;
 	}
 /*	
@@ -1586,7 +2357,12 @@ IMP LuaSubclassBridge_CreateAndSetFFIClosureForSetMethod(lua_State* lua_state, C
 	NSLog(@"the_selector:%s", sel_getName(the_selector));
 */
 	// Will call addMethod or method_setImplementation depending on the situation
+	
 	class_replaceMethod(the_class, the_selector, (IMP)imp_closure, method_signature);
+
+	// Track/record which lua_State(s) this is defined in.
+	// Multple Lua states are allowed for convenience but all definitions must be the same since there is only one true Obj-C definition.
+	[[LuaClassDefinitionMap sharedDefinitionMap] addLuaState:lua_state forClass:the_class forSelector:the_selector];
 
 	return (IMP)imp_closure;
 	
@@ -1755,7 +2531,7 @@ id LuaSubclassBridge_InvokeLuaMethod(id self, SEL _cmd)
 	if(NULL == existing_lua_state)
 	{
 		// fallback, get from database
-		lua_state = [[LuaClassDefinitionMap sharedDefinitionMap] firstLuaStateForClass];
+		lua_state = [[LuaClassDefinitionMap sharedDefinitionMap] anyLuaStateForSelector:_cmd inClass:[self class]];
 	}
 	else
 	{
@@ -2231,13 +3007,16 @@ Class LuaSubclassBridge_InternalCreateClass(lua_State* lua_state, const char* ne
 			return NULL;
 		}
 		
-		// I will not return an error if the class is redefined in a different lua state.
-		// However, both implementations must be identical.
+		// I used to return an error for classes being redefined in the same Lua state, but not if redefined from different Lua states to help multiple Lua states and relaunching scenarios.
+		// But after changing to track on a per-selector basis instead of classes, it is easier to not check at all.
+		// Remember, all implementations must be identical.
+		/*
 		if([[LuaClassDefinitionMap sharedDefinitionMap] isClassDefined:new_class inLuaState:lua_state])
 		{
 			luaL_error(lua_state, "Error: Class: %s is redefined in the same lua_State", new_class_name);
 			return NULL;
 		}
+		*/
 		
 		// return the existing class since it already exists
 		return new_class;
@@ -2261,6 +3040,9 @@ Class LuaSubclassBridge_InternalCreateClass(lua_State* lua_state, const char* ne
 	{
 		// What is this? Are we going to use luaL_ref to hold a table?
 		class_addIvar(new_class, LUA_SUBCLASS_BRIDGE_IVAR_FOR_STATE_AND_UNIQUE_IDENTIFIER, sizeof(lua_State*), log2(sizeof(lua_State*)), "^");
+		
+		// For finalizers, I am concerned about non-origin-thread clean up. I need an ivar to track which thread the Lua state belongs to.
+		class_addIvar(new_class, LUA_SUBCLASS_BRIDGE_IVAR_FOR_ORIGIN_THREAD, sizeof(lua_State*), log2(sizeof(lua_State*)), "^");
 		
 		// What is this? Are we going to use luaL_ref to hold a table?
 		//		class_addIvar(new_class, "__ivars", sizeof(int), log2(sizeof(int)), "i");
@@ -2342,6 +3124,12 @@ Class LuaSubclassBridge_InternalCreateClass(lua_State* lua_state, const char* ne
 		class_addMethod(new_class, @selector(luaCocoaState), (IMP)LuaSubclassBridge_luaCocoaState, "^@:");
 		class_addMethod(new_class, @selector(cleanupLuaCocoaInstance), (IMP)LuaSubclassBridge_cleanupLuaCocoaInstance, "v@:");
 		
+		// Not sure if I really need to add these. I don't think I do because I don't actually subclass these in Lua.
+		/*
+		[[LuaClassDefinitionMap sharedDefinitionMap] addLuaState:lua_state forClass:new_class forSelector:@selector(setLuaCocoaState:)];
+		[[LuaClassDefinitionMap sharedDefinitionMap] addLuaState:lua_state forClass:new_class forSelector:@selector(luaCocoaState:)];
+		[[LuaClassDefinitionMap sharedDefinitionMap] addLuaState:lua_state forClass:new_class forSelector:@selector(cleanupLuaCocoaInstance:)];
+		*/
 		
 	}
 	return new_class;
@@ -2398,8 +3186,10 @@ int LuaSubclassBridge_CreateClass(lua_State* lua_state)
 		LuaUserDataContainerForObject* class_container = (LuaUserDataContainerForObject*)lua_touserdata(lua_state, -1);
 		class_container->isLuaSubclass = true;
 		
-		// Keep track of which lua state(s) defined this class
-		[[LuaClassDefinitionMap sharedDefinitionMap] addLuaState:lua_state forClass:new_class];
+		// I used to track class definitions per Lua state. But I realized per-selector made more sense because of categories.
+		// However, for object initialization from Obj-C, it is convenient to know whether the Lua state is still alive so I need to register something.
+		// So I will register 'alloc' as a placeholder.
+		[[LuaClassDefinitionMap sharedDefinitionMap] addLuaState:lua_state forClass:new_class forSelector:@selector(alloc)];
 		
 		// Special implementions for dealloc and finalize to make sure objects are removed from the GlobalStrongTable
 		LuaSubclassBridge_CreateAndSetFFIClosureForDeallocFinalize(lua_state, new_class, "dealloc", @selector(dealloc), -1);
@@ -2426,6 +3216,52 @@ int LuaSubclassBridge_CreateClass(lua_State* lua_state)
 		return 1;
 	}
 }
+
+// 1 or -3 for userdata object
+// 2 or -2 for index or key
+// 3 or -1 for new value
+bool LuaCategoryBridge_SetCategoryWithMethodAndSignature(lua_State* lua_state)
+{
+	LuaUserDataContainerForObject* lua_class_container = LuaObjectBridge_LuaCheckClass(lua_state, 1);
+	Class the_class = LuaObjectBridge_GetClass(lua_class_container);
+	// This is very similar to subclassing. I need a place to store the mapping of Lua functions for the overridden Obj-C methods.
+	// I need to store a strong reference in the global strong table so the object will not be collected,
+	// even when all active Lua references are gone. This is because once Obj-C classes are registered,
+	// there doesn't seem to be a way to unregister them.
+	// NOTE: This may look like a leak, but I don't think classes are allowed to be removed once registered.
+	// So this is going to sit in memory until the Lua state is closed.
+	// Insert into a strong global table because we want to be able to find this object and prevent it from being collected.
+	LuaCocoaStrongTable_InsertObjectInGlobalStrongTable(lua_state, 1, the_class);
+	
+	// Shoot. I already forgot how this all worked. But it seems that I don't need the subclass environment table for this.
+/*	
+	LuaSubclassBridge_CreateNewLuaSubclassEnvironmentTable(lua_state);
+	LuaCocoaStrongTable_InsertLuaSubclassEnvironmentTableInGlobalStrongTable(lua_state, -1, the_class);
+	lua_pop(lua_state, 1);
+*/	
+	
+	
+	// The remaining code should be the same as subclass
+	return LuaSubclassBridge_SetNewMethodAndSignature(lua_state);
+}
+
+bool LuaCategoryBridge_SetNewMethod(lua_State* lua_state)
+{
+	LuaUserDataContainerForObject* lua_class_container = LuaObjectBridge_LuaCheckClass(lua_state, 1);
+	Class the_class = LuaObjectBridge_GetClass(lua_class_container);
+	// This is very similar to subclassing. I need a place to store the mapping of Lua functions for the overridden Obj-C methods.
+	// I need to store a strong reference in the global strong table so the object will not be collected,
+	// even when all active Lua references are gone. This is because once Obj-C classes are registered,
+	// there doesn't seem to be a way to unregister them.
+	// NOTE: This may look like a leak, but I don't think classes are allowed to be removed once registered.
+	// So this is going to sit in memory until the Lua state is closed.
+	// Insert into a strong global table because we want to be able to find this object and prevent it from being collected.
+	LuaCocoaStrongTable_InsertObjectInGlobalStrongTable(lua_state, -1, the_class);
+	
+	// The remaining code should be the same as subclass
+	return LuaSubclassBridge_SetNewMethod(lua_state);
+}
+
 /*
  static const struct luaL_reg LuaSelectorBridge_MethodsForSelectorMetatable[] =
  {

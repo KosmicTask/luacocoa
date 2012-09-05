@@ -119,6 +119,7 @@ LUACOCOA_EXPORT @interface LuaCocoa : NSObject
 	NSMutableDictionary* frameworksLoaded;
 	bool skipDLopen; // in case you are using with other language bridges
 	bool disableImportFromLua; // consider for sandboxing
+	NSThread* originThread; // because Lua/LuaCocoa are not completely thread-safe, I might need this.
 
 	// Not sure if I want to make part of the API
 //	lua_CFunction luaErrorFunction;

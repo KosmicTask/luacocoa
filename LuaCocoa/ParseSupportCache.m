@@ -51,6 +51,9 @@ static id s_cacheSingleton;
 		cacheOfFunctionNames = [[NSMutableDictionary alloc] init];
 		cacheOfClassNamesToClassMethods = [[NSMutableDictionary alloc] init];
 		cacheOfClassNamesToInstanceMethods = [[NSMutableDictionary alloc] init];
+		cacheOfStructTypeEncodingsToStructNames = [[NSMutableDictionary alloc] init];
+		cacheOfStructKeyNamesToSizes = [[NSMutableDictionary alloc] init];
+		cacheOfStructTypeEncodingStringsToStructTypeEncodingArrays = [[NSMutableDictionary alloc] init];
 	}
 	
 	return self;
@@ -62,6 +65,9 @@ static id s_cacheSingleton;
 	[cacheOfClassNamesToInstanceMethods release];
 	[cacheOfFunctionNames release];
 	[cacheOfStructKeyNames release];
+	[cacheOfStructTypeEncodingsToStructNames release];
+	[cacheOfStructKeyNamesToSizes release];
+	[cacheOfStructTypeEncodingStringsToStructTypeEncodingArrays release];
 
 	[super dealloc];
 }
@@ -127,6 +133,48 @@ static id s_cacheSingleton;
 	}
 	NSMutableDictionary* second_level_methods_cache = [top_level_class_name_cache objectForKey:class_name];
 	return [second_level_methods_cache objectForKey:method_name];
+}
+
+
+
+- (void) insertStructName:(NSString*)struct_name typeEncoding:(NSString*)type_encoding
+{
+	[cacheOfStructTypeEncodingsToStructNames setObject:struct_name forKey:type_encoding];
+	[cacheOfStructNamesToStructTypeEncodings setObject:type_encoding forKey:struct_name];
+}
+
+- (NSString*) structNameForTypeEncoding:(NSString*)type_encoding
+{
+	return [cacheOfStructTypeEncodingsToStructNames objectForKey:type_encoding];
+}
+
+- (NSString*) typeEncodingForStructName:(NSString*)struct_name
+{
+	return [cacheOfStructNamesToStructTypeEncodings objectForKey:struct_name];
+}
+
+
+
+- (void) insertStructSize:(size_t)struct_size structKeyName:(NSString*)struct_key_name
+{
+	[cacheOfStructKeyNamesToSizes setObject:[NSNumber numberWithUnsignedInteger:struct_size] forKey:struct_key_name];
+	
+}
+
+- (NSNumber*) structSizeForStructKeyName:(NSString*)struct_key_name
+{
+	return [cacheOfStructKeyNamesToSizes objectForKey:struct_key_name];
+}
+
+
+- (void) insertStructTypeEncodingArray:(NSArray*)type_encoding_array structTypeEncodingString:(NSString*)type_encoding_string
+{
+	[cacheOfStructTypeEncodingStringsToStructTypeEncodingArrays setObject:type_encoding_array forKey:type_encoding_string];
+
+}
+- (NSArray*) structTypeEncodingArrayForStructTypeEncodingString:(NSString*)type_encoding_string
+{
+	return [cacheOfStructTypeEncodingStringsToStructTypeEncodingArrays objectForKey:type_encoding_string];
 }
 
 

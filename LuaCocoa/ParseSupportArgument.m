@@ -7,7 +7,7 @@
 //
 
 #import "ParseSupportArgument.h"
-
+#import "ParseSupportFunction.h"
 
 @implementation ParseSupportArgument
 
@@ -22,6 +22,8 @@
 @synthesize isVariadic;
 @synthesize isConst;
 @synthesize isAlreadyRetained;
+@synthesize isFunctionPointer;
+@synthesize functionPointerEncoding;
 
 - (id) init
 {
@@ -39,12 +41,15 @@
 		isVariadic = false;
 		isConst = false;
 		isAlreadyRetained = false;
+		isFunctionPointer = false;
+		functionPointerEncoding = nil;
 	}
 	return self;
 }
 
 - (void) dealloc
 {
+	[functionPointerEncoding release];
 	[flattenedObjcEncodingTypeArray release];
 	[inOutTypeModifier release];
 	[objcEncodingType release];
@@ -78,6 +83,8 @@
 	new_copy.isVariadic = self.isVariadic;
 	new_copy.isConst = self.isConst;
 	new_copy.isAlreadyRetained = self.isAlreadyRetained;
+	new_copy.isFunctionPointer = self.isFunctionPointer;
+	new_copy.functionPointerEncoding = self.functionPointerEncoding;
 }
 
 - (void) mutableCopyPropertiesTo:(id)target_copy withZone:(NSZone*)the_zone
@@ -104,6 +111,8 @@
 	new_copy.isVariadic = self.isVariadic;
 	new_copy.isConst = self.isConst;
 	new_copy.isAlreadyRetained = self.isAlreadyRetained;
+	new_copy.isFunctionPointer = self.isFunctionPointer;
+	new_copy.functionPointerEncoding = self.functionPointerEncoding;
 }
 
 - (id) copyWithZone:(NSZone*)the_zone
@@ -118,6 +127,18 @@
 	ParseSupportArgument* new_copy = [[ParseSupportArgument allocWithZone:the_zone] init];
 	[self mutableCopyPropertiesTo:new_copy withZone:the_zone];
 	return new_copy;
+}
+
+- (bool) isBlock
+{
+	if(YES == [[self objcEncodingType] isEqualToString:@"@?"])
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 @end

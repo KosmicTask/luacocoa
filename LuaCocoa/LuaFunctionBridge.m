@@ -210,7 +210,7 @@ int LuaFunctionBridge_FFIPrepCif(lua_State* lua_state)
 	size_t size_of_real_args = sizeof(ffi_type*) * parse_support.numberOfRealArguments;
 	size_t size_of_flattened_args = sizeof(ffi_type*) * parse_support.numberOfFlattenedArguments;
 	size_t size_of_custom_type_args = sizeof(ffi_type) * parse_support.numberOfRealArgumentsThatNeedToBeFlattened;
-	size_t size_of_real_return = sizeof(ffi_type*);
+//	size_t size_of_real_return = sizeof(ffi_type*);
 	size_t size_of_flattened_return = sizeof(ffi_type*) * parse_support.numberOfFlattenedReturnValues;
 	size_t size_of_custom_type_return;
 	if(0 == size_of_flattened_return)
@@ -228,7 +228,7 @@ int LuaFunctionBridge_FFIPrepCif(lua_State* lua_state)
 							  + size_of_real_args
 							  + size_of_flattened_args
 							  + size_of_custom_type_args
-							  + size_of_real_return
+//							  + size_of_real_return  // I think this gets removed due to the bug found by Fjolnir
 							  + size_of_flattened_return
 							  + size_of_custom_type_return
 							  );
@@ -252,12 +252,22 @@ int LuaFunctionBridge_FFIPrepCif(lua_State* lua_state)
 	address_ptr = (int8_t*)(address_ptr + size_of_custom_type_args);
 	
 	// 5
-	ffi_type* real_return_ptr = (ffi_type*)(address_ptr + size_of_flattened_args);
-	address_ptr = (int8_t*)(address_ptr + size_of_flattened_args);
+	// Based on the bug found by Fjolnir, I think this is wrong too.
+	// I think the pointer should be NULL to be set by FFISupport_ParseSupportFunctionReturnValueToFFIType.
+	// But this will impact the memory address offsets and size of the structure.
+	// For a struct return, I think the custom_type_return_ptr gets uses as the address for real_return_ptr, so these are the same thing.
+	// So I think I can skip the address increment and remove this from the sizeof caluculation above. 
+//	ffi_type* real_return_ptr = (ffi_type*)(address_ptr + size_of_flattened_args);
+//	address_ptr = (int8_t*)(address_ptr + size_of_flattened_args);
+	ffi_type* real_return_ptr = NULL;
+
 	
 	// 6
-	ffi_type* custom_type_return_ptr = (ffi_type*)(address_ptr + size_of_real_return);
-	address_ptr = (int8_t*)(address_ptr + size_of_real_return);
+	// This address changes to +size_of_flattened_args because of the above bug fix.
+//	ffi_type* custom_type_return_ptr = (ffi_type*)(address_ptr + size_of_real_return);
+//	address_ptr = (int8_t*)(address_ptr + size_of_real_return);
+	ffi_type* custom_type_return_ptr = (ffi_type*)(address_ptr + size_of_flattened_args);
+	address_ptr = (int8_t*)(address_ptr + size_of_flattened_args);
 	
 	// 7
 	ffi_type** flattened_return_ptr = (ffi_type**)(address_ptr + size_of_custom_type_return);
@@ -624,7 +634,7 @@ int LuaFunctionBridge_FFICall(lua_State* lua_state)
 						{
 							if(lua_isnil(lua_state, j))
 							{
-								putarg(int8_t*, NULL);
+								putarg(int16_t*, NULL);
 							}
 							else
 							{
@@ -769,9 +779,10 @@ int LuaFunctionBridge_FFICall(lua_State* lua_state)
 							else
 							{
 								array_for_ffi_ref_arguments[i] = alloca(sizeof(double));
-								*((double*)(array_for_ffi_ref_arguments[i])) = lua_tointeger(lua_state, j);
+								*((double*)(array_for_ffi_ref_arguments[i])) = lua_tonumber(lua_state, j);
 								putarg(double*, (double*)&(array_for_ffi_ref_arguments[i]));
 							}
+							break;
 						}
 						case _C_FLT:
 						{
@@ -782,9 +793,10 @@ int LuaFunctionBridge_FFICall(lua_State* lua_state)
 							else
 							{
 								array_for_ffi_ref_arguments[i] = alloca(sizeof(float));
-								*((float*)(array_for_ffi_ref_arguments[i])) = lua_tointeger(lua_state, j);
+								*((float*)(array_for_ffi_ref_arguments[i])) = lua_tonumber(lua_state, j);
 								putarg(float*, (float*)&(array_for_ffi_ref_arguments[i]));
 							}
+							break;
 						}
 							
 						case _C_STRUCT_B:

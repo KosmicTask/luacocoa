@@ -1,0 +1,312 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00D5A5EA1566E02800718681 /* lpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D5A5E31566E02800718681 /* lpeg.c */; };
+		00D5A5EB1566E02800718681 /* lpeg.h in Headers */ = {isa = PBXBuildFile; fileRef = 00D5A5E41566E02800718681 /* lpeg.h */; };
+		00D5A6351566F73900718681 /* lpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D5A5E31566E02800718681 /* lpeg.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		00D5A5D11566DF6200718681 /* liblpeg.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblpeg.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		00D5A5E11566E02800718681 /* HISTORY */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HISTORY; sourceTree = "<group>"; };
+		00D5A5E21566E02800718681 /* lpeg-128.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "lpeg-128.gif"; sourceTree = "<group>"; };
+		00D5A5E31566E02800718681 /* lpeg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lpeg.c; sourceTree = "<group>"; };
+		00D5A5E41566E02800718681 /* lpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lpeg.h; sourceTree = "<group>"; };
+		00D5A5E51566E02800718681 /* lpeg.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = lpeg.html; sourceTree = "<group>"; };
+		00D5A5E61566E02800718681 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
+		00D5A5E71566E02800718681 /* re.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = re.html; sourceTree = "<group>"; };
+		00D5A5E81566E02800718681 /* re.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lua; path = re.lua; sourceTree = "<group>"; };
+		00D5A5E91566E02800718681 /* test.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lua; path = test.lua; sourceTree = "<group>"; };
+		00D5A6311566F6DF00718681 /* lpeg.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = lpeg.so; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		00D5A5CE1566DF6200718681 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00D5A62E1566F6DF00718681 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00D5A5C61566DF6200718681 = {
+			isa = PBXGroup;
+			children = (
+				00D5A5E01566E02800718681 /* lpeg */,
+				00D5A5D21566DF6200718681 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		00D5A5D21566DF6200718681 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				00D5A5D11566DF6200718681 /* liblpeg.a */,
+				00D5A6311566F6DF00718681 /* lpeg.so */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		00D5A5E01566E02800718681 /* lpeg */ = {
+			isa = PBXGroup;
+			children = (
+				00D5A5E11566E02800718681 /* HISTORY */,
+				00D5A5E21566E02800718681 /* lpeg-128.gif */,
+				00D5A5E31566E02800718681 /* lpeg.c */,
+				00D5A5E41566E02800718681 /* lpeg.h */,
+				00D5A5E51566E02800718681 /* lpeg.html */,
+				00D5A5E61566E02800718681 /* makefile */,
+				00D5A5E71566E02800718681 /* re.html */,
+				00D5A5E81566E02800718681 /* re.lua */,
+				00D5A5E91566E02800718681 /* test.lua */,
+			);
+			name = lpeg;
+			path = ../lpeg;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		00D5A5CF1566DF6200718681 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00D5A5EB1566E02800718681 /* lpeg.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00D5A62F1566F6DF00718681 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		00D5A5D01566DF6200718681 /* liblpeg */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00D5A5D51566DF6200718681 /* Build configuration list for PBXNativeTarget "liblpeg" */;
+			buildPhases = (
+				00D5A5CD1566DF6200718681 /* Sources */,
+				00D5A5CE1566DF6200718681 /* Frameworks */,
+				00D5A5CF1566DF6200718681 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = liblpeg;
+			productName = lpeg;
+			productReference = 00D5A5D11566DF6200718681 /* liblpeg.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		00D5A6301566F6DF00718681 /* lpeg */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00D5A6321566F6E000718681 /* Build configuration list for PBXNativeTarget "lpeg" */;
+			buildPhases = (
+				00D5A62D1566F6DF00718681 /* Sources */,
+				00D5A62E1566F6DF00718681 /* Frameworks */,
+				00D5A62F1566F6DF00718681 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = lpeg;
+			productName = lpeg;
+			productReference = 00D5A6311566F6DF00718681 /* lpeg.so */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		00D5A5C81566DF6200718681 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 00D5A5CB1566DF6200718681 /* Build configuration list for PBXProject "lpeg" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 00D5A5C61566DF6200718681;
+			productRefGroup = 00D5A5D21566DF6200718681 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				00D5A6301566F6DF00718681 /* lpeg */,
+				00D5A5D01566DF6200718681 /* liblpeg */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		00D5A5CD1566DF6200718681 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00D5A5EA1566E02800718681 /* lpeg.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00D5A62D1566F6DF00718681 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00D5A6351566F73900718681 /* lpeg.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		00D5A5D31566DF6200718681 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_CW_ASM_SYNTAX = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = supported;
+				GCC_ENABLE_PASCAL_STRINGS = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../lua/src";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		00D5A5D41566DF6200718681 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_CW_ASM_SYNTAX = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = supported;
+				GCC_ENABLE_PASCAL_STRINGS = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../lua/src";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		00D5A5D61566DF6200718681 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_CURRENT_VERSION = /usr/local/lib;
+				EXECUTABLE_PREFIX = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		00D5A5D71566DF6200718681 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_CURRENT_VERSION = /usr/local/lib;
+				EXECUTABLE_PREFIX = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		00D5A6331566F6E000718681 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_EXTENSION = so;
+				MACH_O_TYPE = mh_bundle;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		00D5A6341566F6E000718681 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_EXTENSION = so;
+				MACH_O_TYPE = mh_bundle;
+				OTHER_LDFLAGS = (
+					"-undefined",
+					dynamic_lookup,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		00D5A5CB1566DF6200718681 /* Build configuration list for PBXProject "lpeg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00D5A5D31566DF6200718681 /* Debug */,
+				00D5A5D41566DF6200718681 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00D5A5D51566DF6200718681 /* Build configuration list for PBXNativeTarget "liblpeg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00D5A5D61566DF6200718681 /* Debug */,
+				00D5A5D71566DF6200718681 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00D5A6321566F6E000718681 /* Build configuration list for PBXNativeTarget "lpeg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00D5A6331566F6E000718681 /* Debug */,
+				00D5A6341566F6E000718681 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 00D5A5C81566DF6200718681 /* Project object */;
+}

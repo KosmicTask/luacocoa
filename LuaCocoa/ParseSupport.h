@@ -48,8 +48,10 @@
 // {CGRect=&quot;origin&quot;{CGPoint=&quot;x&quot;d&quot;y&quot;d}&quot;size&quot;{CGSize=&quot;width&quot;d&quot;height&quot;d}}
 // And it will return an array of d,d,d,d
 // Note this is different than the function version which lacks quotes and the field name
+// This version is cached. Call this one.
 + (NSArray*) typeEncodingsOfStructureFromStructureTypeEncoding:(NSString*)structureTypeEncoding;
-+ (NSArray*) typeEncodingsOfStructureFromStructureTypeEncoding:(NSString*)structureTypeEncoding parsedCount:(int*)count;
+// This one version with the count should not be called externally because it is not cached.
+//+ (NSArray*) typeEncodingsOfStructureFromStructureTypeEncoding:(NSString*)structureTypeEncoding parsedCount:(int*)count;
 + (size_t)sizeOfStructureFromStructureName:(NSString*)structure_name;
 + (size_t)sizeOfStructureFromArrayOfPrimitiveObjcTypes:(NSArray*)types;
 
@@ -83,6 +85,9 @@ bool ParseSupport_IsAlreadyRetained(NSXMLElement* root_element);
 bool ParseSupport_IsMagicCookie(NSXMLElement* root_element);
 
 NSString* ParseSupport_ObjcTypeFromKeyName(NSString* key_name);
+
+bool ParseSupport_IsFunctionPointer(NSXMLElement* root_element);
+
 
 @end
 

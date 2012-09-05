@@ -493,7 +493,12 @@ union luai_Cast { double l_d; long l_l; };
 ** compiling as C++ code, with _longjmp/_setjmp when asked to use them,
 ** and with longjmp/setjmp otherwise.
 */
-#if defined(__cplusplus)
+#if defined(LUA_USE_OBJC_EXCEPTIONS)
+/* Requires additional Obj-C file to be compiled in to avoid forcing all of Lua to be compiled as Obj-C. */
+/* This means the definition is not defined here to avoid contamination since this header is used by everybody.
+ * ldo.c has been modified since it is the single user of these macros.
+ */
+#elif defined(__cplusplus)
 /* C++ exceptions */
 #define LUAI_THROW(L,c)	throw(c)
 #define LUAI_TRY(L,c,a)	try { a } catch(...) \

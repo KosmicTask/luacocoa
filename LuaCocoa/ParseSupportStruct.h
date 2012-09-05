@@ -14,6 +14,9 @@
 	NSString* structName; // could be different than keyname as in the case of NSPoint->CGPoint
 	NSMutableArray* fieldNameArray;
 	NSMutableArray* fieldElementArray;
+
+	// Note: I have two caches for size. One as a global function and one here. I should see about unifying.
+	// I am worried that the function may be called before a valid ParseSupportStruct is available though.
 	size_t sizeOfStruct;
 }
 
@@ -22,6 +25,13 @@
 @property(retain, readonly) NSMutableArray* fieldElementArray;
 @property(assign, readonly) size_t sizeOfStruct;
 
+
+// Designated initializer. Running through the profiler, I found that creating and immediately releasing all the memory from
+// calling alloc, due to a cache find not needing the object anymore, was causing noticable overhead.
+// Use this instead to bypass unnecessary alloc call.s
++ (id) parseSupportStructFromKeyName:(NSString*)key_name;
+
+// Use the above designiated initializer instead.
 - (id) initWithKeyName:(NSString*)key_name;
 /**
   For a struct like:

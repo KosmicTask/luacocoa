@@ -22,6 +22,7 @@
 #import "LuaStructBridge.h"
 #import "LuaSelectorBridge.h"
 #import "LuaSubclassBridge.h" // special hack for init 
+#import "LuaBlockBridge.h"
 #import "NSStringHelperFunctions.h"
 #include "LuaCocoaWeakTable.h"
 #include "LuaCocoaStrongTable.h"
@@ -943,6 +944,20 @@ id LuaObjectBridge_topropertylist(lua_State* lua_state, int stack_index)
 		}
 		// can we improve these?
 		case LUA_TFUNCTION:
+		{
+#if NS_BLOCKS_AVAILABLE
+			// Blocks!
+			// In this case, we have a raw Lua function that is not already boxed in a id/block.
+			// We need to create a block to wrap the the Lua function.
+			// Things to be aware of:
+			// We must keep a reference to the Lua function so it doesn't get collected.
+			// I'm not sure if the block should be copied. For safety, copying will avoid potential problems at the trade off of speed.
+			
+#else
+			return nil;
+#endif
+			
+		}
 		case LUA_TTHREAD:
 		case LUA_TLIGHTUSERDATA:
 		default:
@@ -985,6 +1000,12 @@ void LuaObjectBridge_pushunboxedpropertylist(lua_State* lua_state, id the_object
 		SEL return_selector;
 		[the_object getValue:&return_selector];
 		lua_pushstring(lua_state, [NSStringFromSelector(return_selector) UTF8String]);
+	}
+	else if([the_object isKindOfClass:NSClassFromString(@"NSBlock")])
+	{
+		// If the block was created from Lua, we can return the original Lua function.
+		// This function will either push the Lua function on the stack or push nil.
+		LuaCocoaWeakTable_GetLuaFunctionForBlockInGlobalWeakTable(lua_state, the_object);
 	}
 	else
 	{
@@ -1193,9 +1214,33 @@ static int LuaObjectBridge_Call(lua_State* lua_state)
 	// ca_layer.name(ca_layer) does the same thing.
 	// Only ca_layer.name() does what I am expecting: a single userdata argument
 	
-//	NSLog(@"In LuaObjectBridge_Call");
+	//	NSLog(@"In LuaObjectBridge_Call");
 	int number_of_arguments = lua_gettop(lua_state);
-//	NSLog(@"number_of_arguments=%d", number_of_arguments);
+	//	NSLog(@"number_of_arguments=%d", number_of_arguments);
+	
+#if NS_BLOCKS_AVAILABLE
+	
+	
+	// Blocks!
+	// In this case, we have a raw Lua function that is not already boxed in a id/block.
+	// We need to create a block to wrap the the Lua function.
+	// Things to be aware of:
+	// We must keep a reference to the Lua function so it doesn't get collected.
+	// I'm not sure if the block should be copied. For safety, copying will avoid potential problems at the trade off of speed.
+	LuaUserDataContainerForObject* lua_class_container = LuaObjectBridge_LuaCheckClass(lua_state, 1);
+	id the_object = lua_class_container->theObject;
+	
+	if(LuaObjectBridge_IsInstance(lua_class_container))
+	{
+		if([the_object isKindOfClass:NSClassFromString(@"NSBlock")])
+		{
+			// We specify '2' to denote the arguments start after the block object at position 1
+			return LuaBlockBridge_CallBlock(lua_state, the_object, 2);
+		}
+	}
+#endif
+	
+	
 #if LUAOBJECTBRIDGE_ENABLE_GETTER_DOT_NOTATION
 	if(number_of_arguments == 1)
 	{
@@ -1246,20 +1291,37 @@ static int LuaObjectBridge_SetIndexOnClass(lua_State* lua_state)
 		return 0;
 	}
 	
-	
-	if(LuaObjectBridge_IsClass(lua_class_container) && LuaObjectBridge_IsLuaSubclass(lua_class_container))
+	// New methods on Lua subclasses and categories on existing classes are very similar, but different due to the way I implemented things. Bleh.
+	if(LuaObjectBridge_IsClass(lua_class_container))
 	{
 		bool ret_flag;
-		if(lua_istable(lua_state, 3))
+		if(LuaObjectBridge_IsLuaSubclass(lua_class_container))
 		{
-			ret_flag = LuaSubclassBridge_SetNewMethodAndSignature(lua_state);
+			if(lua_istable(lua_state, 3))
+			{
+				ret_flag = LuaSubclassBridge_SetNewMethodAndSignature(lua_state);
+			}
+			else
+			{
+				// Assumption: This is a Lua-only method.
+				// I might be able to guess, but there is an ambiguity between class and instance methods
+				// if both exist which I don't really want to deal with.
+				ret_flag = LuaSubclassBridge_SetNewMethod(lua_state);
+			}
 		}
-		else
+		else // for categories
 		{
-			// Assumption: This is a Lua-only method.
-			// I might be able to guess, but there is an ambiguity between class and instance methods
-			// if both exist which I don't really want to deal with.
-			ret_flag = LuaSubclassBridge_SetNewMethod(lua_state);
+			if(lua_istable(lua_state, 3))
+			{
+				ret_flag = LuaCategoryBridge_SetCategoryWithMethodAndSignature(lua_state);
+			}
+			else
+			{
+				// Assumption: This is a Lua-only method.
+				// I might be able to guess, but there is an ambiguity between class and instance methods
+				// if both exist which I don't really want to deal with.
+				ret_flag = LuaSubclassBridge_SetNewMethod(lua_state);
+			}
 		}
 		if(true == ret_flag)
 		{
@@ -1642,14 +1704,12 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 #warning "FIXME: Need clue as to whether class or instance method"
 
 		// Load up the Obj-C runtime and XML info into an object we can more easily use
-		parse_support = [[[ParseSupportMethod alloc] 
-						  initWithClassName:class_name
+		parse_support = [ParseSupportMethod parseSupportMethodFromClassName:class_name
 						  methodName:[NSString stringWithUTF8String:objc_method_name] 
 						  isInstance:LuaObjectBridge_IsInstance(object_container)
 						  theReceiver:the_object
 						  isClassMethod:LuaObjectBridge_IsClass(object_container)
-						  ] 
-						 autorelease];
+						];
 		
 		// If there are variadic arguments, add them to the parse support information.
 		// Note that if there are variadic arguments, this parse_support instance cannot be reused/cached for different function calls
@@ -1811,7 +1871,6 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 	size_t size_of_real_args = sizeof(ffi_type*) * parse_support.numberOfRealArguments;
 	size_t size_of_flattened_args = sizeof(ffi_type*) * parse_support.numberOfFlattenedArguments;
 	size_t size_of_custom_type_args = sizeof(ffi_type) * parse_support.numberOfRealArgumentsThatNeedToBeFlattened;
-	size_t size_of_real_return = sizeof(ffi_type*);
 	size_t size_of_flattened_return = sizeof(ffi_type*) * parse_support.numberOfFlattenedReturnValues;
 	size_t size_of_custom_type_return;
 	if(0 == size_of_flattened_return)
@@ -1830,7 +1889,6 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 	size_t size_of_real_args_proxy = size_of_real_args ? size_of_real_args : ARBITRARY_NONZERO_SIZE;
 	size_t size_of_flattened_args_proxy = size_of_flattened_args ? size_of_flattened_args : ARBITRARY_NONZERO_SIZE;
 	size_t size_of_custom_type_args_proxy = size_of_custom_type_args ? size_of_custom_type_args : ARBITRARY_NONZERO_SIZE;
-	size_t size_of_real_return_proxy = size_of_real_return ? size_of_real_return : ARBITRARY_NONZERO_SIZE;
 	size_t size_of_flattened_return_proxy = size_of_flattened_return ? size_of_flattened_return : ARBITRARY_NONZERO_SIZE;
 	size_t size_of_custom_type_return_proxy = size_of_custom_type_return ? size_of_custom_type_return : ARBITRARY_NONZERO_SIZE;
 #undef ARBITRARY_NONZERO_SIZE
@@ -1840,7 +1898,6 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 	int8_t real_args_array[size_of_real_args_proxy];
 	int8_t flattened_args_array[size_of_flattened_args_proxy];
 	int8_t custom_type_args_array[size_of_custom_type_args_proxy];
-	int8_t real_return_array[size_of_real_return_proxy];
 	int8_t flattened_return_array[size_of_flattened_return_proxy];
 	int8_t custom_type_return_array[size_of_custom_type_return_proxy];
 
@@ -1851,7 +1908,7 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 	ffi_type* custom_type_args_ptr = (ffi_type*)&custom_type_args_array[0];
 	ffi_type** flattened_args_ptr = (ffi_type**)&flattened_args_array[0];
 
-	ffi_type* real_return_ptr = (ffi_type*)&real_return_array[0];
+	ffi_type* real_return_ptr = NULL;
 	ffi_type* custom_type_return_ptr = (ffi_type*)&custom_type_return_array[0];
 	ffi_type** flattened_return_ptr = (ffi_type**)&flattened_return_array[0];
 
@@ -1885,10 +1942,6 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 	{
 		custom_type_args_ptr = NULL;
 	}
-	if(0 == size_of_real_return || true == is_void_return)
-	{
-		real_return_ptr = NULL;
-	}
 	if(0 == size_of_flattened_return || true == is_void_return)
 	{
 		flattened_return_ptr = NULL;
@@ -1900,6 +1953,7 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 	
 	FFISupport_ParseSupportFunctionArgumentsToFFIType(parse_support, custom_type_args_ptr, &real_args_ptr, flattened_args_ptr);
 		
+	// real_return_ptr will be set by the function.
 	FFISupport_ParseSupportFunctionReturnValueToFFIType(parse_support, custom_type_return_ptr, &real_return_ptr, flattened_return_ptr);
 	
 	
@@ -2588,6 +2642,15 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 							{
 								putarg(id, nil);
 							}
+							else if(lua_isfunction(lua_state, j) && [current_parse_support_argument isBlock])
+							{
+								// coerce Lua function into Obj-C block
+								id new_block = LuaBlockBridge_CreateBlockFromLuaFunctionWithParseSupport(lua_state, j, [current_parse_support_argument functionPointerEncoding]);
+								[new_block autorelease];
+								//id block_userdata = LuaObjectBridge_Pushid(lua_state, new_block);
+								
+								putarg(id, new_block);
+							}
 							else
 							{
 								// Will auto-coerce numbers, strings, tables to Cocoa objects
@@ -2625,6 +2688,22 @@ static int LuaObjectBridge_InvokeMethod(lua_State* lua_state)
 						}
 							
 						case _C_PTR:
+						{
+							if(lua_isfunction(lua_state, j) && [current_parse_support_argument isFunctionPointer])
+							{
+								NSLog(@"Non-block function pointers not implemented yet. Should be easy to adapt block code to handle.");
+								// coerce Lua function into Obj-C block
+								
+//								id new_block = LuaBlockBridge_CreateBlockFromLuaFunctionWithParseSupport(lua_state, j, [current_parse_support_argument.functionPointerEncoding]);
+//								putarg(id, new_block);
+								putarg(void*, lua_touserdata(lua_state, j));
+
+							}
+							else
+							{
+								putarg(void*, lua_touserdata(lua_state, j));
+							}
+						}
 						default:
 						{
 							putarg(void*, lua_touserdata(lua_state, j));

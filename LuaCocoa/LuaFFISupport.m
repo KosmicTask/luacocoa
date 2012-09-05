@@ -430,6 +430,27 @@ int LuaFFISupport_PushReturnValueForPointerReference(lua_State* lua_state, void*
 			break;
 		}
 		case _C_PTR:
+		{
+			// Special case: We need to distinguish between CoreFoundation types and others.
+			// I forgot what the MagicCookie is stuff is so I omit that which is used elsewhere. (I also don't have the xml.)
+			void** check_ptr = return_value;
+			if(NULL == check_ptr || NULL == *check_ptr)
+			{
+				lua_pushnil(lua_state);
+			}
+			// Oops: I can be __CF or __CG. I think I need to track the CFType/tollfree bridge stuff and some how resolve the mapping.
+			//					if([type_encoding_string hasPrefix:@"^{__CF"])
+			else if([nsstring_encoding_type hasPrefix:@"^{__C"])
+			{
+				LuaObjectBridge_Pushid(lua_state, **(id**)return_value);
+			}
+			else
+			{
+				lua_pushlightuserdata(lua_state, *(void**)return_value);
+			}
+			number_of_return_values++;
+			break;
+		}
 		default:
 		{
 			void** check_ptr = return_value;
@@ -461,7 +482,8 @@ int LuaFFISupport_PushReturnValue(lua_State* lua_state, void* return_value, ffi_
 		return LuaFFISupport_PushReturnValueForPointerReference(lua_state, return_value, ffi_type_for_arg, parse_support_argument, stack_index_for_value_already_in_stack);
 		
 	}
-	char objc_encoding_type = [parse_support_argument.objcEncodingType UTF8String][0];
+	NSString* type_encoding_string = [parse_support_argument objcEncodingType];
+	char objc_encoding_type = [type_encoding_string UTF8String][0];
 	
 	int number_of_return_values = 0;
 	
@@ -587,9 +609,25 @@ int LuaFFISupport_PushReturnValue(lua_State* lua_state, void* return_value, ffi_
 					break;
 				}
 				case _C_PTR:
+				{
+					// Special case: We need to distinguish between CoreFoundation types and others.
+					// I forgot what the MagicCookie is stuff is so I omit that which is used elsewhere. (I also don't have the xml.)
+					// Oops: I can be __CF or __CG. I think I need to track the CFType/tollfree bridge stuff and some how resolve the mapping.
+//					if([type_encoding_string hasPrefix:@"^{__CF"])
+					if([type_encoding_string hasPrefix:@"^{__C"])
+					{
+						LuaObjectBridge_PushidWithRetainOption(lua_state, *(id*) return_value, should_retain);
+					}
+					else
+					{
+						lua_pushlightuserdata(lua_state, *(void**) return_value);
+					}
+					number_of_return_values++;
+					break;
+				}
 				default:
 				{
-					lua_pushlightuserdata(lua_state, (void*) return_value);
+					lua_pushlightuserdata(lua_state, *(void**) return_value);
 					number_of_return_values++;
 					break;
 				}
@@ -696,7 +734,8 @@ size_t LuaFFISupport_ParseVariadicArguments(lua_State* lua_state, ParseSupportFu
 						// <sigh>
 						// But maybe it doesn't matter if I am just trying to get the name part?
 						//luaL_error(lua_state, "Lua type:%s not supported for variadic function parameter", lua_typename(lua_state, current_lua_stack_position));
-						//ParseSupportStruct* parse_support_struct = [[[ParseSupportStruct alloc] initWithKeyName:key_name] autorelease];
+						//ParseSupportStruct* parse_support_struct = [ParseSupportStruct parseSupportStructFromKeyName:key_name];
+
 						NSString* xml_string = [[[BridgeSupportController sharedController] masterXmlHash] objectForKey:key_name];
 						NSError* xml_error = nil;
 						NSXMLDocument* xml_document = [[[NSXMLDocument alloc] initWithXMLString:xml_string options:0 error:&xml_error] autorelease];

@@ -21,7 +21,7 @@ NSApp = NSApplication:sharedApplication()
 NSApp:setActivationPolicy_(NSApplicationActivationPolicyRegular)
 
 local menu_bar = NSMenu:alloc():init()
-local app_menu_item = NSMenuItem:alloc()
+local app_menu_item = NSMenuItem:alloc():init()
 menu_bar:addItem_(app_menu_item)
 NSApp:setMainMenu_(menu_bar)
 local app_menu = NSMenu:alloc():init()

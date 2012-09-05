@@ -161,6 +161,100 @@
 	return self;
 }
 
+// Used by blocks implementation. Calls generic initFunctionPointerWithXMLElement:objcEncodingType: below
+- (id) initFunctionPointerWithXMLString:(NSString*)xml_string objcEncodingType:(NSString*)objc_encoding_type
+{
+	NSError* xml_error = nil;
+
+	NSXMLDocument* xml_document = [[[NSXMLDocument alloc] initWithXMLString:xml_string options:0 error:&xml_error] autorelease];
+	if(nil != xml_error)
+	{
+		NSLog(@"Unexpected error: ParseSupport initWithXMLString: failed in xmlDocument creation: %@", [xml_error localizedDescription]);
+	}
+	
+	NSXMLElement* root_element = [xml_document rootElement];
+	
+	return [self initFunctionPointerWithXMLElement:root_element objcEncodingType:objc_encoding_type];
+}
+
+
+- (id) initFunctionPointerWithXMLElement:(NSXMLElement*)root_element objcEncodingType:(NSString*)objc_encoding_type
+{
+/*
+ <function name='CFMachPortCreateWithPort'>
+ <arg type='^{__CFAllocator=}'/>
+ <arg type='I'/>
+ <arg function_pointer='true' type='^?' type_modifier='n'>
+ <arg type='^{__CFMachPort=}'/>
+ <arg type='^v'/>
+ <arg type64='q' type='l'/>
+ <arg type='^v'/>
+ <retval type='v'/>
+ </arg>
+ <arg type64='^{_CFMachPortContext=q^v^?^?^?}' type='^{_CFMachPortContext=i^v^?^?^?}' type_modifier='n'/>
+ <arg type='^B' type_modifier='o'/>
+ <retval already_retained='true' type='^{__CFMachPort=}'/>
+ </function>
+ <function name='CFMachPortGetContext'>
+ <arg type='^{__CFMachPort=}'/>
+ <arg type64='^{_CFMachPortContext=q^v^?^?^?}' type='^{_CFMachPortContext=i^v^?^?^?}' type_modifier='o'/>
+ </function>
+ <function name='CFMachPortGetInvalidationCallBack'>
+ <arg type='^{__CFMachPort=}'/>
+ <retval function_pointer='true' type='^?'>
+ <arg type='^{__CFMachPort=}'/>
+ <arg type='^v'/>
+ <retval type='v'/>
+ </retval>
+ </function>
+
+ 
+ <method selector='indexWithOptions:passingTest:'>
+ <arg function_pointer='true' type='@?' index='1'>
+ <arg type64='Q' type='I'/>
+ <arg type='^B'/>
+ <retval type='B'/>
+ </arg>
+ </method>
+
+ */
+	
+	// I had to parse all the xml stuff to get the key name. 
+	// As an optimization, I will bypass super initWithXMLString
+	//	self = [super initWithXMLString:xml_string];
+	self = [super init];
+	if(nil != self)
+	{
+		xmlDocument = nil;
+		rootElement = [root_element retain];
+		keyName = nil; // function pointers have no name (thinking anonymous blocks)
+		
+		
+		argumentArray = [[NSMutableArray alloc] init];
+		returnValue = nil;
+		dlsymFunctionPointer = NULL;
+		
+		isVariadic = ParseSupport_IsVariadic(rootElement);
+		
+		
+		// If this function pointer is for an Obj-C block, the first argument must be the block which is not explicitly listed in the metadata.
+		// So we must inject the argument manually for consistency in the implementation.
+		if([objc_encoding_type isEqualToString:@"@?"])
+		{
+			ParseSupportArgument* parse_support_argument = [[[ParseSupportArgument alloc] init] autorelease];
+			parse_support_argument.objcEncodingType = @"@?";
+			parse_support_argument.isFunctionPointer = true;
+			// add it to the array
+			[argumentArray addObject:parse_support_argument];
+		}
+		[self parseChildren];
+		
+		
+	}
+	return self;
+
+}
+
 
 - (void) copyPropertiesTo:(id)target_copy withZone:(NSZone*)the_zone
 {
@@ -358,7 +452,9 @@
 //		NSLog(@"Type '^' not handled yet");
 //		internalError = true;
 
-		if([parse_support_argument.objcEncodingType hasPrefix:@"^{__CF"] && !ParseSupport_IsMagicCookie(rootElement))
+		// Oops: I can be __CF or __CG. I think I need to track the CFType/tollfree bridge stuff and some how resolve the mapping.
+		//					if([type_encoding_string hasPrefix:@"^{__CF"])
+		if([parse_support_argument.objcEncodingType hasPrefix:@"^{__C"] && !ParseSupport_IsMagicCookie(rootElement))
 		{
 //			NSLog(@"May have found a CFType: %@", parse_support_argument.objcEncodingType);
 			// FIXME: Should cross check with database to verify this is a cftype that can bridge to nsobject
@@ -436,8 +532,27 @@
 	parse_support_argument.nullAccepted = ParseSupport_NullAccepted(child_node_element);
 	parse_support_argument.isPrintfFormat = ParseSupport_IsPrintfFormat(child_node_element);
 	parse_support_argument.isAlreadyRetained = ParseSupport_IsAlreadyRetained(child_node_element);
+	parse_support_argument.isFunctionPointer = ParseSupport_IsFunctionPointer(child_node_element);
+
 	[self handleSpecialEncodingTypes:parse_support_argument];
-	
+
+	if(true == parse_support_argument.isFunctionPointer)
+	{
+		// I'm only expecting one child
+		NSUInteger number_of_children = [rootElement childCount];
+		assert(number_of_children == 1);
+		for(NSUInteger i=0; i<number_of_children; i++)
+		{
+			NSXMLNode* child_node = [rootElement childAtIndex:i];
+			if(NSXMLElementKind != [child_node kind])
+			{
+				continue;
+			}
+			NSXMLElement* child_node_element = (NSXMLElement*)child_node;
+			
+			parse_support_argument.functionPointerEncoding = [[[ParseSupportFunction alloc] initFunctionPointerWithXMLElement:child_node_element objcEncodingType:parse_support_argument.objcEncodingType] autorelease];
+		}
+	}
 }
 
 // helper for parseChildren

@@ -5,6 +5,9 @@
 //  Created by Eric Wing on 11/25/09.
 //  Copyright 2009 PlayControl Software, LLC. All rights reserved.
 //
+#ifndef _LUACOCOA_CLASSDEFINITIONMAP_H
+#define _LUACOCOA_CLASSDEFINITIONMAP_H
+
 
 #import <Foundation/Foundation.h>
 
@@ -16,18 +19,26 @@ struct lua_State;
 {
 	// For now, I am going to claim that it is possible to define categories or Lua classes in multiple lua states
 	// (Case is that the same definition exists and is just repeated because of duplicate module imports.)
-	// Hence, the key will be a pointer, but values will be an array containing lua states.
-	NSMapTable* classToLuaStateMap;
+	
+	// map[class][selector] = { set of lua_States }
+	NSMapTable* classToSelectorMap;
+
+	// for partial reverse mapping
+	NSMapTable* luaToClassToSelectorMap;
 }
 
 + (id) sharedDefinitionMap;
 
-- (void) addLuaState:(struct lua_State*)lua_state forClass:(Class)the_class;
-- (NSPointerArray*) pointerArrayOfLuaStatesForClass:(Class)the_class;
-- (struct lua_State*) firstLuaStateForClass:(Class)the_class;
-- (bool) isClassDefined:(Class)the_class inLuaState:(struct lua_State*)lua_state;
+//- (void) addLuaState:(struct lua_State*)lua_state forClass:(Class)the_class;
+- (void) addLuaState:(struct lua_State*)lua_state forClass:(Class)the_class forSelector:(SEL)the_selector;
+
+- (struct lua_State*) anyLuaStateForSelector:(SEL)the_selector inClass:(Class)the_class;
+
+- (bool) isSelectorDefined:(SEL)the_selector inClass:(Class)the_class inLuaState:(struct lua_State*)lua_state;
 
 - (void) removeLuaStateFromMap:(struct lua_State*)lua_state;
 
 
 @end
+
+#endif /* _LUACOCOA_CLASSDEFINITIONMAP_H */

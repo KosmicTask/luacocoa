@@ -78,16 +78,17 @@
 #if __LP64__
 	#define LNUM_DOUBLE
 	#define LNUM_INT64
-#else // implicitly 32-bit Mac
+#else /* implicitly 32-bit Mac
 	// TODO: Add case for iPhone
 	// Should we try float for 32-bit since we now have an int type?
 	// There are enough double APIs in Cocoa that keeping double might be best
+	*/
 	#define LNUM_DOUBLE
 	#define LNUM_INT32
 #endif
 
-// Seems cool. Why not? We're already using C99 in the Bridge.
-#define LNUM_COMPLEX
+/* Seems cool. Why not? We're already using C99 in the Bridge. */
+/* #define LNUM_COMPLEX */
 
 /*
 ** LUA_NUMBER is the type of floating point number in Lua

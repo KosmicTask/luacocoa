@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+@class ParseSupportFunction;
 
 @interface ParseSupportArgument : NSObject
 {
@@ -23,6 +23,9 @@
 	bool isVariadic;
 	bool isConst;
 	bool isAlreadyRetained;
+	
+	bool isFunctionPointer;
+	ParseSupportFunction* functionPointerEncoding;
 }
 
 //@property(retain) NSString* declaredType;
@@ -36,6 +39,9 @@
 @property(assign, getter=isVariadic, setter=setVariadic:) bool isVariadic;
 @property(assign, getter=isConst, setter=setConst:) bool isConst;
 @property(assign, getter=isAlreadyRetained, setter=setAlreadyRetained:) bool isAlreadyRetained;
+@property(assign, getter=isFunctionPointer, setter=setFunctionPointer:) bool isFunctionPointer;
+@property(assign, readonly, getter=isBlock) bool isBlock;
+@property(retain) ParseSupportFunction* functionPointerEncoding;
 
 - (id) copyWithZone:(NSZone*)the_zone;
 - (id) mutableCopyWithZone:(NSZone*)the_zone;

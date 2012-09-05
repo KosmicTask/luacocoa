@@ -34,8 +34,15 @@
 @property(retain, readonly) NSMutableArray* argumentArray;
 //@property(retain, readonly) NSMutableArray* flattendArgumentRepresentationArray;
 
+
+// Note: These numberOf* properties have varying degrees of computation/processing under the hood.
+
+// The number of arguments to a function.
 @property(assign, readonly) NSUInteger numberOfRealArguments;
+// Only counts flattened arguments with null terminator.
+// Does not include real arguments in the count.
 @property(assign, readonly) NSUInteger numberOfFlattenedArguments;
+// Basically the number of structs in the list
 @property(assign, readonly) NSUInteger numberOfRealArgumentsThatNeedToBeFlattened;
 
 @property(assign, readonly) NSUInteger numberOfFlattenedReturnValues;
@@ -51,6 +58,9 @@
 //@property(assign, readonly) void* dlsymFunctionPointer;
 @property(assign, readwrite) void* dlsymFunctionPointer;
 
+
+// Used by blocks implementation
+- (id) initFunctionPointerWithXMLString:(NSString*)xml_string objcEncodingType:(NSString*)objc_encoding_type;
 
 - (NSArray*) argumentObjcEncodingTypes;
 - (NSString*) returnValueObjcEncodingType;

@@ -32,7 +32,37 @@ void LuaCocoaWeakTable_InsertObjectInGlobalWeakTableForSuper(struct lua_State* l
 	
 void* LuaCocoaWeakTable_GetObjectInGlobalWeakTableForSuper(struct lua_State* lua_state, void* the_object);
 	
+
+
+
 	
+	
+void LuaCocoaWeakTable_InsertLuaFunctionKeyAndBlockValueInGlobalWeakTable(struct lua_State* lua_state, int stack_position_of_lua_function, void* the_block);
+
+/* Leaves result on the stack. Don't forget to pop when done.
+ */
+void* LuaCocoaWeakTable_GetBlockForLuaFunctionInGlobalWeakTable(struct lua_State* lua_state, int stack_position_of_lua_function);
+
+
+/**
+ * @stack_position_of_lua_function Where the lua function for the new block is in the Lua stack. Will use as the key the weak table.
+ * @the_block The raw Objective-C object/pointer (no lua container).
+ * Object is defined loosely as we currently use anything with a container including NSObjects and selectors.
+ * I think it will actually work with any thing that is a pointer.
+ */
+void LuaCocoaWeakTable_InsertBlockKeyAndLuaFunctionValueInGlobalWeakTable(struct lua_State* lua_state, void* the_block, int stack_position_of_lua_function);
+/* Returns true if the function is there, false if not. Leaves result on the stack or nil on the stack. Don't forget to pop when done.
+ */
+_Bool LuaCocoaWeakTable_GetLuaFunctionForBlockInGlobalWeakTable(struct lua_State* lua_state, void* the_block);
+
+	
+
+// Convenience method that wraps LuaCocoaWeakTable_InsertLuaFunctionKeyAndBlockValueInGlobalWeakTable and LuaCocoaWeakTable_InsertBlockKeyAndLuaFunctionValueInGlobalWeakTable
+// This adds the mappings in both directions
+void LuaCocoaWeakTable_InsertBidirectionalLuaFunctionBlockInGlobalWeakTable(struct lua_State* lua_state, int stack_position_of_lua_function, void* the_block);
+
+// This removes the mappings in both directions
+void LuaCocoaWeakTable_RemoveBidirectionalLuaFunctionBlockInGlobalWeakTable(struct lua_State* lua_state, void* the_block);
 
 #ifdef __cplusplus
 }

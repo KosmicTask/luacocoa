@@ -7,6 +7,7 @@
 //
 
 #import "ParseSupport.h"
+#import "ParseSupportCache.h"
 #import "BridgeSupportController.h"
 #import "NSStringHelperFunctions.h"
 
@@ -132,40 +133,47 @@
 
 + (NSArray*) typeEncodingsFromStructureName:(NSString*)structure_name
 {
-	NSError* xml_error = nil;
-	NSDictionary* xml_hash  = [[BridgeSupportController sharedController] masterXmlHash];
-	NSString* dict_value = [xml_hash objectForKey:structure_name];
-	if(nil == dict_value)
-	{
-		// FIXME: Under 32-bit, I am bit by the leading underscore again (_NSPoint). Argh!
-		dict_value = [xml_hash objectForKey:NSStringHelperFunctions_StripLeadingUnderscores(structure_name)];
-		if(nil == dict_value)
-		{
-			NSLog(@"Unexpected error in typeEncodingsFromStructureName, can't get value for key=%@", structure_name);
-			return nil;
-		}
-	}
-	NSXMLDocument* xml_document = [[[NSXMLDocument alloc] initWithXMLString:dict_value options:0 error:&xml_error] autorelease];
-	if(nil != xml_error)
-	{
-		NSLog(@"Unexpected error: ParseSupport initWithKeyName: failed in xmlDocument creation: %@", [xml_error localizedDescription]);
-	}
-	
-	NSXMLElement* root_element = [xml_document rootElement];
-	
-	
-	
-#if __LP64__	
-	NSString* type_encoding_string = [[root_element attributeForName:@"type64"] stringValue];
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
+	NSString* type_encoding_string = [parse_support_cache typeEncodingForStructName:structure_name];
 	if(nil == type_encoding_string)
 	{
-		type_encoding_string = [[root_element attributeForName:@"type"] stringValue];				
+		NSError* xml_error = nil;
+		NSDictionary* xml_hash  = [[BridgeSupportController sharedController] masterXmlHash];
+		NSString* dict_value = [xml_hash objectForKey:structure_name];
+		if(nil == dict_value)
+		{
+			// FIXME: Under 32-bit, I am bit by the leading underscore again (_NSPoint). Argh!
+			dict_value = [xml_hash objectForKey:NSStringHelperFunctions_StripLeadingUnderscores(structure_name)];
+			if(nil == dict_value)
+			{
+				NSLog(@"Unexpected error in typeEncodingsFromStructureName, can't get value for key=%@", structure_name);
+				return nil;
+			}
+		}
+		NSXMLDocument* xml_document = [[[NSXMLDocument alloc] initWithXMLString:dict_value options:0 error:&xml_error] autorelease];
+		if(nil != xml_error)
+		{
+			NSLog(@"Unexpected error: ParseSupport initWithKeyName: failed in xmlDocument creation: %@", [xml_error localizedDescription]);
+		}
+		
+		NSXMLElement* root_element = [xml_document rootElement];
+		
+		
+		
+	#if __LP64__	
+		type_encoding_string = [[root_element attributeForName:@"type64"] stringValue];
+		if(nil == type_encoding_string)
+		{
+			type_encoding_string = [[root_element attributeForName:@"type"] stringValue];				
+		}
+	#else
+		type_encoding_string = [[root_element attributeForName:@"type"] stringValue];
+	#endif
+	//	NSLog(@"type_encoding_string=%@", type_encoding_string);
+		// add to cache
+		[parse_support_cache insertStructName:structure_name typeEncoding:type_encoding_string];
 	}
-#else
-	NSString* type_encoding_string = [[root_element attributeForName:@"type"] stringValue];
-#endif
-//	NSLog(@"type_encoding_string=%@", type_encoding_string);
-
+	
 	return [[self class] typeEncodingsOfStructureFromStructureTypeEncoding:type_encoding_string];
 }
 
@@ -255,12 +263,7 @@
 }
 
 
-+ (NSArray*) typeEncodingsOfStructureFromStructureTypeEncoding:(NSString*)structureTypeEncoding
-{
-	return [self typeEncodingsOfStructureFromStructureTypeEncoding:structureTypeEncoding parsedCount:nil];
-}
-
-
+// This version is not cached with ParseSupportCache. Use the version without parseCount:
 + (NSArray*) typeEncodingsOfStructureFromStructureTypeEncoding:(NSString*)structureTypeEncoding parsedCount:(int*)count
 {
 	id types = [[[NSMutableArray alloc] init] autorelease];
@@ -338,10 +341,36 @@
 	return	types;
 }
 
++ (NSArray*) typeEncodingsOfStructureFromStructureTypeEncoding:(NSString*)structureTypeEncoding
+{
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
+	NSArray* type_encoding_array = [parse_support_cache structTypeEncodingArrayForStructTypeEncodingString:structureTypeEncoding];
+	if(nil != type_encoding_array)
+	{
+		return type_encoding_array;
+	}
+	
+	type_encoding_array = [self typeEncodingsOfStructureFromStructureTypeEncoding:structureTypeEncoding parsedCount:nil];
+	[parse_support_cache insertStructTypeEncodingArray:type_encoding_array structTypeEncodingString:structureTypeEncoding];
+	
+	return type_encoding_array;
+}
+
 + (size_t)sizeOfStructureFromStructureName:(NSString*)structure_name
 {
-	return [[self class] sizeOfStructureFromArrayOfPrimitiveObjcTypes:[[self class] typeEncodingsFromStructureName:structure_name]];
+	// Note: I have two caches for size. This one and the one in ParseSupportStruct. I should see about unifying.
+	// I am worried that this function may be called before a valid ParseSupportStruct is available though.
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
 
+	NSNumber* boxed_size = [parse_support_cache structSizeForStructKeyName:structure_name];
+	if(nil != boxed_size)
+	{
+		return [boxed_size unsignedIntValue];
+	}
+	
+	size_t return_size = [[self class] sizeOfStructureFromArrayOfPrimitiveObjcTypes:[[self class] typeEncodingsFromStructureName:structure_name]];
+	[parse_support_cache insertStructSize:return_size structKeyName:structure_name];
+	return return_size;
 }
 
 
@@ -692,13 +721,20 @@
 
 NSString* ParseSupport_StructureReturnNameFromReturnTypeEncoding(NSString* return_type_encoding)
 {
+	NSString* struct_name = nil;
+	ParseSupportCache* parse_support_cache = [ParseSupportCache sharedCache];
+	struct_name = [parse_support_cache structNameForTypeEncoding:return_type_encoding];
+	if(nil != struct_name)
+	{
+		return struct_name;
+	}
+	
 	// Could rewrite not use NSScanner, but did it to try to get familar with API
 	NSCharacterSet* end_marker;
 	NSScanner* the_scanner;
 	
 	NSString* opening_marker_to_skip = @"{";
 	
-	NSString* struct_name = nil;
 	
 	end_marker = [NSCharacterSet characterSetWithCharactersInString:@"="];
 	the_scanner = [NSScanner scannerWithString:return_type_encoding];
@@ -712,9 +748,12 @@ NSString* ParseSupport_StructureReturnNameFromReturnTypeEncoding(NSString* retur
 		{
 			
 //			NSLog(@"Struct type is: %@", struct_name);
-			return struct_name;
+//			return struct_name;
+			break;
 		}
 	}
+	
+	[parse_support_cache insertStructName:struct_name typeEncoding:return_type_encoding];	
 	return struct_name;
 }
 
@@ -922,6 +961,27 @@ NSString* ParseSupport_ObjcTypeFromKeyName(NSString* key_name)
 	}
 	NSString* encoding_string = ParseSupport_ObjcType([xml_document rootElement]);
 	return encoding_string;
+}
+
+
+bool ParseSupport_IsFunctionPointer(NSXMLElement* root_element)
+{
+	NSString* is_function_pointer = [[root_element attributeForName:@"function_pointer"] stringValue];
+	if(nil == is_function_pointer)
+	{
+		return false;
+	}
+	else
+	{
+		if([is_function_pointer isEqualToString:@"true"])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 @end

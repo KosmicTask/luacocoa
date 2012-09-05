@@ -82,7 +82,7 @@ void LuaCocoaStrongTable_CreateGlobalStrongObjectTable(lua_State* lua_state)
 }
 
 /**
- * #stack_position_of_userdata Where the userdata (LuaUserDataContainerForObject*) for the new object is in the Lua stack.
+ * @stack_position_of_userdata Where the userdata (LuaUserDataContainerForObject*) for the new object is in the Lua stack.
  * @the_object The raw Objective-C object/pointer (no lua container). Will use as the key (light userdata) the strong table.
  * Object is defined loosely as we currently use anything with a container including NSObjects and selectors.
  * I think it will actually work with any thing that is a pointer.
@@ -118,17 +118,8 @@ void LuaCocoaStrongTable_InsertObjectInGlobalStrongTable(lua_State* lua_state, i
  */
 void* LuaCocoaStrongTable_GetObjectInGlobalStrongTable(lua_State* lua_state, void* the_object)
 {
-	lua_getfield(lua_state, LUA_REGISTRYINDEX, LUACOCOA_OBJECT_GLOBAL_STRONG_TABLE_ID); // puts the global weak table on top of the stack
-	
-	lua_pushlightuserdata(lua_state, the_object); // stack: [strong_table the_object_ptr]
-	lua_gettable(lua_state, -2); // get strong_table[the_object], stack: [strong_table lua_object_container_userdata]
-	
-	// Either nil or the lua_object_container is on the top of the stack.
-	// But the weaktable is still underneath it.
-	// Since I'm modifying the stack, I want to hide the weak_table as an implementation detail
-	// and return so there is only 1 new item on the stack (not two). So replace the strong_table
-	// with my return value and pop.
-	lua_replace(lua_state, -2); // takes the top item and replaces the item at index -2 with it and pops
+	// The block implmentation is currently identical except it doesn't return any values so we can build on top of it.
+	LuaCocoaStrongTable_GetLuaFunctionValueForBlockCleanupKeyInGlobalStrongTable(lua_state, the_object);
 	
 	if(lua_isnil(lua_state, -1))
 	{
@@ -140,8 +131,16 @@ void* LuaCocoaStrongTable_GetObjectInGlobalStrongTable(lua_State* lua_state, voi
 	}
 }
 
+
+void LuaCocoaStrongTable_RemoveObjectInGlobalStrongTable(lua_State* lua_state, void* the_object)
+{	
+	lua_pushnil(lua_state);
+	LuaCocoaStrongTable_InsertObjectInGlobalStrongTable(lua_state, -1, the_object);
+	lua_pop(lua_state, 1);
+}
+
 /**
- * #stack_position_of_table Where the table for the new object is in the Lua stack.
+ * @stack_position_of_table Where the table for the new object is in the Lua stack.
  * @the_object The raw Objective-C object/pointer (no lua container). Will use as the key (light userdata) the strong table.
  * Object is defined loosely as we currently use anything with a container including NSObjects and selectors.
  * I think it will actually work with any thing that is a pointer.
@@ -243,3 +242,40 @@ void LuaCocoaStrongTable_RemoveLuaSubclassEnvironmentTableInGlobalStrongTable(lu
 	assert(top0 == top1);
 }
 
+
+/**
+ * This function is intended to save the Lua function in the registry to prevent garbage collection from deleting out from under the Obj-C block that is using it.
+ * @stack_position_of_luafunction Where the Lua function is in the Lua stack.
+ * @the_block The raw Objective-C object/pointer (no lua container). Will use as the key (light userdata) the strong table.
+ * Object is defined loosely as we currently use anything with a container including NSObjects and selectors.
+ * I think it will actually work with any thing that is a pointer.
+ */
+void LuaCocoaStrongTable_InsertLuaFunctionValueForBlockCleanupKeyInGlobalStrongTable(lua_State* lua_state, int stack_position_of_luafunction, void* the_block)
+{
+	// Can reuse object implementation
+	LuaCocoaStrongTable_InsertObjectInGlobalStrongTable(lua_state, stack_position_of_luafunction, the_block);
+}
+
+/* Leaves result on the stack. Don't forget to pop when done.
+ */
+void LuaCocoaStrongTable_GetLuaFunctionValueForBlockCleanupKeyInGlobalStrongTable(lua_State* lua_state, void* the_block)
+{
+	lua_getfield(lua_state, LUA_REGISTRYINDEX, LUACOCOA_OBJECT_GLOBAL_STRONG_TABLE_ID); // puts the global weak table on top of the stack
+	
+	lua_pushlightuserdata(lua_state, the_block); // stack: [strong_table the_object_ptr]
+	lua_gettable(lua_state, -2); // get strong_table[the_object], stack: [strong_table lua_object_container_userdata]
+	
+	// Either nil or the lua_object_container is on the top of the stack.
+	// But the weaktable is still underneath it.
+	// Since I'm modifying the stack, I want to hide the weak_table as an implementation detail
+	// and return so there is only 1 new item on the stack (not two). So replace the strong_table
+	// with my return value and pop.
+	lua_replace(lua_state, -2); // takes the top item and replaces the item at index -2 with it and pops
+
+}
+
+void LuaCocoaStrongTable_RemoveLuaFunctionValueForBlockCleanupKeyInGlobalStrongTable(lua_State* lua_state, void* the_block)
+{
+	// The object implementation is identical except it returns values, so we can just use it and throw away the return value.
+	LuaCocoaStrongTable_RemoveObjectInGlobalStrongTable(lua_state, the_block);
+}

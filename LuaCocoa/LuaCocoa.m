@@ -62,15 +62,20 @@
 #import "LuaFunctionBridge.h"
 #import "LuaSelectorBridge.h"
 #import "LuaSubclassBridge.h"
+#import "LuaBlockBridge.h"
 
 #include "LuaCocoaWeakTable.h"
 #include "LuaCocoaStrongTable.h"
 #include "LuaFFIClosure.h"
 
 #import "ParseSupportCache.h"
+#import "LuaClassDefinitionMap.h"
+#import "LuaCocoaAvailableLuaStates.h"
 
+/*
 // No lpeg.h, so I forward declare it here so I can use it.
 extern int luaopen_lpeg (lua_State *L);
+*/
 
 //NSString* const kLuaCocoaErrorDomain = @"kLuaCocoaErrorDomain";
 
@@ -321,7 +326,9 @@ static void LuaCocoa_RegisterConstants(lua_State* lua_state, NSXMLDocument* xml_
 		}
 		case _C_PTR:
 		{
-			if([type_encoding_string hasPrefix:@"^{__CF"] && !ParseSupport_IsMagicCookie([xml_document rootElement]))
+			// Oops: I can be __CF or __CG. I think I need to track the CFType/tollfree bridge stuff and some how resolve the mapping.
+			//					if([type_encoding_string hasPrefix:@"^{__CF"])
+			if([type_encoding_string hasPrefix:@"^{__C"] && !ParseSupport_IsMagicCookie([xml_document rootElement]))
 			{
 				//				 NSLog(@"May have found a CFType: %@", type_encoding_string);
 				// FIXME: Should cross check with database to verify this is a cftype that can bridge to nsobject
@@ -685,6 +692,10 @@ static void LuaCocoa_RegisterItemForKeyWithXMLFragment(lua_State* lua_state, NSS
 		// of that require a type except for casting, which again doesn't seem relevant in a loosely typed language.
 		// So I guess for now, I don't have to implement anything for this case.
 		
+		
+		// Update: I'm wrong about needing to track this. I need to use this information to decide whether I push a raw pointer or push a LuaCocoa object userdata wrapper around Core Foundation objects.
+		// CGEventSourceCreate for key stroke generation broke me.
+		// Note that this is CG and not CF so checking for CF isn't sufficient.
 	}
 	
 	else
@@ -996,9 +1007,38 @@ static const char* s_ResolveNameMetaTable =
 "setmetatable(_G, { __index = LuaCocoa.resolveName })";
 #endif
 
+// Used for finalizer/threading issues
+@interface LuaCocoaDataForCleanup : NSObject
+{
+	lua_State* luaState;
+	bool ownsState;
+}
+@property(nonatomic, assign, readonly) lua_State* luaState;
+@property(nonatomic, assign, readonly) bool ownsState;
+
+- (id) initWithLuaState:(lua_State*)lua_state ownsState:(bool)owns_state;
+@end
+
+@implementation LuaCocoaDataForCleanup
+
+@synthesize luaState;
+@synthesize ownsState;
+
+- (id) initWithLuaState:(lua_State*)lua_state ownsState:(bool)owns_state
+{
+	self = [super init];
+	if(nil != self)
+	{
+		luaState = lua_state;
+		ownsState = owns_state;
+	}
+	return self;
+}
+
+@end
+
 @interface LuaCocoa ()
 - (void) commonInit;
-- (void) cleanUp;
 
 - (void) registerItemsForFramework:(NSString*)base_name;
 
@@ -1020,6 +1060,15 @@ static const char* s_ResolveNameMetaTable =
 - (void) commonInit
 {
 	frameworksLoaded = [[NSMutableDictionary alloc] init];
+
+	// Need to CFRetain because I need this alive in finalize so I can invoke non-thread-safe stuff
+	originThread = [NSThread currentThread];
+	CFRetain(originThread);
+	
+	// Keep track of Lua states that are available.
+	// This is intended to guard against asynchronous block callbacks from invoking dead Lua states.
+	// This may have other uses. (Subclass bridge has a different mechanism for tracking.)
+	[[LuaCocoaAvailableLuaStates sharedAvailableLuaStates] addLuaState:luaState];
 
 	lua_gc(luaState, LUA_GCSTOP, 0);  /* stop collector during initialization */
 
@@ -1067,12 +1116,12 @@ static const char* s_ResolveNameMetaTable =
 	
 
 
-	
+/*	
 	// Open LPeg (which we need for Objective Lua)
 	lua_pushcfunction(luaState, luaopen_lpeg);
 	lua_pushstring(luaState, "lpeg");
 	lua_call(luaState, 1, 0);
-	
+*/	
 	
 	// Create global weak table for objects
 	// Must do this before opening the LuaCocoa related libraries
@@ -1108,6 +1157,11 @@ static const char* s_ResolveNameMetaTable =
 	lua_pushcfunction(luaState, luaopen_LuaSubclassBridge);
 	lua_pushstring(luaState, "LuaCocoa");
 	lua_call(luaState, 1, 0);
+	
+	lua_pushcfunction(luaState, luaopen_LuaBlockBridge);
+	lua_pushstring(luaState, "LuaCocoa");
+	lua_call(luaState, 1, 0);
+	
 	
 	
 	CreateGenerateFromXMLFunction(luaState);
@@ -1163,9 +1217,60 @@ static const char* s_ResolveNameMetaTable =
 }
 
 
-- (void) cleanUp
+// See my comments elsewhere in the file about the potential finalize race condition.
+// I've decided to make this a public function so particularly for lua states I don't "own",
+// users can invoke this cleanup themselves. Or if they just want to run collection, they can call this.
++ (void) collectExhaustivelyWaitUntilDone:(bool)should_wait_until_done luaState:(lua_State*)lua_state
 {
-	if(ownsLuaState)
+	// Is it sufficient to call this just before the Obj-C collector, or do I need to repeat in case
+	// there are objects clinging in Obj-C that won't be picked up until finalize is called?
+	// Right now, I think the answer is that only things that deal with finalize are suspect.
+	// So there might be an issue with Lua subclass objects.
+	lua_gc(lua_state, LUA_GCCOLLECT, 0);
+	// Do I really need to call this since I call objc_collect?
+	//	[[NSGarbageCollector defaultCollector] collectExhaustively];
+	objc_collect(OBJC_FULL_COLLECTION);
+	
+	
+	lua_gc(lua_state, LUA_GCCOLLECT, 0);
+	
+	// This might solve the race condition problem with tearing down the lua state.
+	//	objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE);
+	if(should_wait_until_done)
+	{
+		objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE);		
+	}
+	else
+	{
+		objc_collect(OBJC_EXHAUSTIVE_COLLECTION);		
+	}
+}
+
+- (void) collectExhaustivelyWaitUntilDone:(bool)should_wait_until_done 
+{
+	[LuaCocoa collectExhaustivelyWaitUntilDone:should_wait_until_done luaState:luaState];
+}
+
++ (void) collectExhaustivelyWaitUntilDone:(bool)should_wait_until_done
+{
+	// Do I really need to call this since I call objc_collect?
+	[[NSGarbageCollector defaultCollector] collectExhaustively];
+	//	objc_collect(OBJC_FULL_COLLECTION);
+	// This might solve the race condition problem with tearing down the lua state.
+	if(should_wait_until_done)
+	{
+		objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE);		
+	}
+	else
+	{
+		objc_collect(OBJC_EXHAUSTIVE_COLLECTION);		
+	}
+	
+}
+
++ (void) cleanUpForFinalizerLuaState:(lua_State*)lua_state ownsLuaState:(bool)owns_lua_state
+{
+	if(owns_lua_state)
 	{
 		// For Objective-C garbage collection:
 		// Interesting race condition bug:
@@ -1183,78 +1288,107 @@ static const char* s_ResolveNameMetaTable =
 		// (lua_close will call lua's collector one more time though regardless.)
 		// My problem is that since finalization cleanup may be interrupted or done out of order, 
 		// I still don't know if calling here will guarantee that my objects will be cleaned up before I close the lua_State.
-		[self collectExhaustivelyWaitUntilDone:true];
-		
+		// ALERT: 10.7 bug. collectExhaustivelyWaitUntilDone:true will cause the application to hang on quit.
+		// My suspicion is that it is connected to subclassing in Lua because the 
+		// CoreAnimationScriptability example does not hang.
+		// For now, I am changing true to false.
+		// Filed rdar://10660280
+		[LuaCocoa collectExhaustivelyWaitUntilDone:false luaState:lua_state];
+
+	}
+	
+	// We need to delete the entries in the LuaClassDefinitionMap for this state.
+	// The reason is actually not totally obvious, but found in the field.
+	// If the user defines a class in Lua and closes the state, but still uses the implementation,
+	// technically that is a programmer error and not something I care to handle.
+	// (Recall the implementation does try to allow multiple Lua states redefining the class if the definitions are the same as a convenience.)
+	// But we hit a case where we were doing script relaunching like in HybridCoreAnimationScriptability 
+	// and we sometimes got back a recycled pointer address for a new Lua state that was already used.
+	// This triggered an internal assert.
+	// I'm uncertain if I should do this for all lua states or just the ones I own.
+	// The proper thing to do is remove the state from map.
+	// Note: I do this after garbage collection to allow any Lua defined finalizers to be executed.
+	// TODO: When we add blocks, we should do something similar to prevent asynchronus callbacks calling dead Lua states.
+	[[LuaClassDefinitionMap sharedDefinitionMap] removeLuaStateFromMap:lua_state];
+	[[LuaCocoaAvailableLuaStates sharedAvailableLuaStates] removeLuaState:lua_state];
+	
+	if(owns_lua_state)
+	{
+		// Hopefully it is now okay to close the state.
+		lua_close(lua_state);
+	}
+}
+
++ (void) cleanUpForFinalizerWithData:(LuaCocoaDataForCleanup*)pointer_data
+{
+	[LuaCocoa cleanUpForFinalizerLuaState:[pointer_data luaState] ownsLuaState:[pointer_data ownsState]];
+}
+
+
+- (void) dealloc
+{
+	// We need to delete the entries in the LuaClassDefinitionMap for this state.
+	// The reason is actually not totally obvious, but found in the field.
+	// If the user defines a class in Lua and closes the state, but still uses the implementation,
+	// technically that is a programmer error and not something I care to handle.
+	// (Recall the implementation does try to allow multiple Lua states redefining the class if the definitions are the same as a convenience.)
+	// But we hit a case where we were doing script relaunching like in HybridCoreAnimationScriptability 
+	// and we sometimes got back a recycled pointer address for a new Lua state that was already used.
+	// This triggered an internal assert.
+	// I'm uncertain if I should do this for all lua states or just the ones I own.
+	// The proper thing to do is remove the state from map.
+	// Note: I do this after garbage collection to allow any Lua defined finalizers to be executed.
+	// TODO: When we add blocks, we should do something similar to prevent asynchronus callbacks calling dead Lua states.
+	[[LuaClassDefinitionMap sharedDefinitionMap] removeLuaStateFromMap:luaState];
+	[[LuaCocoaAvailableLuaStates sharedAvailableLuaStates] removeLuaState:luaState];
+	
+	if(ownsLuaState)
+	{
 		// Hopefully it is now okay to close the state.
 		lua_close(luaState);
 		luaState = nil;
 	}
 	[frameworksLoaded release];
-}
-
-- (void) dealloc
-{
-	[self cleanUp];
+	
+	if(nil != originThread)
+	{
+		CFRelease(originThread);
+	}
 	[super dealloc];
 }
+
+- (void) finalize
+{
+	if([originThread isEqualTo:[NSThread currentThread]])
+	{
+		// Because blocks may be asynchronous, the Lua state may have been killed off in the interim.
+		// We must guard against calling into a dead Lua state.
+		[LuaCocoa cleanUpForFinalizerLuaState:luaState ownsLuaState:ownsLuaState];
+	}
+	else
+	{
+		// Finalize is on a background thread, but not all the Lua/LuaCocoa stuff is thread safe.
+		// I know the origin Lua thread, so I'll take advantage of it.
+		LuaCocoaDataForCleanup* pointer_data = [[LuaCocoaDataForCleanup alloc] initWithLuaState:luaState ownsState:ownsLuaState];
+		// This says you can use an NSObject class
+		// http://www.cocoabuilder.com/archive/cocoa/217687-forcing-finalization-on-the-main-thread.html
+		[LuaCocoa performSelector:@selector(cleanUpForFinalizerWithData:) onThread:originThread withObject:pointer_data waitUntilDone:NO]; 
+		[pointer_data release];		
+	}
+	
+	if(nil != originThread)
+	{
+		CFRelease(originThread);
+	}
+	
+	[super finalize];
+}
+
 
 + (void) purgeParseSupportCache
 {
 	[ParseSupportCache destroyCache];
 }
-
-// See my comments elsewhere in the file about the potential finalize race condition.
-// I've decided to make this a public function so particularly for lua states I don't "own",
-// users can invoke this cleanup themselves. Or if they just want to run collection, they can call this.
-- (void) collectExhaustivelyWaitUntilDone:(bool)should_wait_until_done
-{
-	// Is it sufficient to call this just before the Obj-C collector, or do I need to repeat in case
-	// there are objects clinging in Obj-C that won't be picked up until finalize is called?
-	// Right now, I think the answer is that only things that deal with finalize are suspect.
-	// So there might be an issue with Lua subclass objects.
-	lua_gc(luaState, LUA_GCCOLLECT, 0);
-	// Do I really need to call this since I call objc_collect?
-//	[[NSGarbageCollector defaultCollector] collectExhaustively];
-	objc_collect(OBJC_FULL_COLLECTION);
-	
-	
-	lua_gc(luaState, LUA_GCCOLLECT, 0);
-
-	// This might solve the race condition problem with tearing down the lua state.
-//	objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE);
-	if(should_wait_until_done)
-	{
-		objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE);		
-	}
-	else
-	{
-		objc_collect(OBJC_EXHAUSTIVE_COLLECTION);		
-	}
-}
-
-+ (void) collectExhaustivelyWaitUntilDone:(bool)should_wait_until_done
-{
-	// Do I really need to call this since I call objc_collect?
-	[[NSGarbageCollector defaultCollector] collectExhaustively];
-	//	objc_collect(OBJC_FULL_COLLECTION);
-	// This might solve the race condition problem with tearing down the lua state.
-	if(should_wait_until_done)
-	{
-		objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE);		
-	}
-	else
-	{
-		objc_collect(OBJC_EXHAUSTIVE_COLLECTION);		
-	}
-
-}
-
-- (void) finalize
-{
-	[self cleanUp];
-	[super finalize];
-}
-
 
 
 
@@ -2307,7 +2441,8 @@ void* LuaCocoa_CheckStruct(lua_State* lua_state, int stack_index, const char* ke
 bool LuaCocoa_PushStruct(lua_State* lua_state, void* the_struct, const char* key_name)
 {
 	NSString* ns_key_name = [NSString stringWithUTF8String:key_name];
-	ParseSupportStruct* parse_support_struct = [[[ParseSupportStruct alloc] initWithKeyName:ns_key_name] autorelease];
+	
+	ParseSupportStruct* parse_support_struct = [ParseSupportStruct parseSupportStructFromKeyName:ns_key_name];
 	if(nil == parse_support_struct)
 	{
 		return false;
