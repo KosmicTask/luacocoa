@@ -139,7 +139,7 @@
 		00D5A5C81566DF6200718681 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0450;
 			};
 			buildConfigurationList = 00D5A5CB1566DF6200718681 /* Build configuration list for PBXProject "lpeg" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -231,6 +231,7 @@
 		00D5A5D61566DF6200718681 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_CURRENT_VERSION = /usr/local/lib;
 				EXECUTABLE_PREFIX = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -240,6 +241,7 @@
 		00D5A5D71566DF6200718681 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_CURRENT_VERSION = /usr/local/lib;
 				EXECUTABLE_PREFIX = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -249,6 +251,7 @@
 		00D5A6331566F6E000718681 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = "";
 				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_EXTENSION = so;
@@ -264,6 +267,7 @@
 		00D5A6341566F6E000718681 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = "";
 				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_EXTENSION = so;
