@@ -1,0 +1,220 @@
+LuaCocoa
+The next-generation successor to the LuaObjCBridge for Objective-C 2.0.
+
+Uses BridgeSupport, libffi, and a whole lot of blood, sweat, and tears to bridge both C and Objective-C including objects, constants, functions, and structs.
+
+It is similar to PyObjC, RubyCocoa, and JSCocoa.
+
+LuaCocoa is under the MIT license.
+
+
+Dedication:
+In memory of my mother who lost her long fight to GIST cancer. (Much of this code was written during long waits at the hospital.)
+http://playcontrol.net/opensource/LuaCocoa/history-of-lua-cocoa-gist-c.html
+
+
+Release Notes: 
+
+v 0.3.3: (CoreGraphics fix for CFTypes moving through the bridge, new sample project showing subclassing/delegate pattern in Lua with NSOpenPanel and NSSavePanel)
+
+- Dealt with bug where CFTypes from CoreGraphics crossing through the bridge were being corrupted.
+
+- Added new example demonstrating the classic delegate pattern featuring NSOpenPanel and NSSavePanel. This example will be complimented by a new example showing the blocks (closure) pattern in the next release utilizing the new Obj-C blocks APIs for NSOpenPanel and NSSavePanel.
+
+- Additional minor fixes.
+
+- This will be the last release of the 0.3 branch. 0.4 will introduce Obj-C blocks support which may impact backwards compatibility, particularly on 10.5.
+
+
+v 0.3.2: (More Lion fixes, command line libreadline support, PowerPC dropped)
+
+- Fixed bug for prepping ffi data return values for structs which was manifesting itself as a ffi failure on Lion 64-bit calling cascadeTopLeftFromPoint in the MinimalAppKit example .
+
+- The command line tools lua and luacocoa are now compiled with LUA_USE_READLINE defined allowing things like up-arrow history searching/repeating.
+	- Notes on readline support:
+		- Linking against libreadline is problematic for backwards compatibility because Apple always writes the resolved symbolic link in the executable. To work around this, I added a shell script phase that rewrites the resolved symbolic link (libedit.3.dylib) to the symbolic link. This rewrite will fail if the resolved link name is not exactly libedit.3.dylib (say you compile against the 10.6 or 10.8 SDK and not 10.7). And this will not work if libedit breaks compatibility between versions. (rdar://10157076)
+		- Xcode 4 seems to have a bug where typing in the Xcode debugger console while running under the debugger will echo all the input you enter. This does not necessarily impact functionality as the echo characters don't seem to be actually submitted to the process. (rdar://10660201)
+
+- All the command line tools (lua, luac, luacocoa) have been changed to compile with garbage collection mode as 'unsupported'. This is to avoid potential problems with 3rd party .so Lua modules that weren't compiled with garbage collection in mind. (This is the likely case.) If there is demand for a gc-enabled-variant, we could consider including a luacocoa_gc tool to the package.
+
+- Worked around a Lion bug where [LuaCocoa collectExhaustivelyWaitUntilDone:true] causes SimpleLuaView and SimpleLuaOpenGLView cause the application to hang on quit. objc_collect(OBJC_EXHAUSTIVE_COLLECTION | OBJC_WAIT_UNTIL_DONE) never returns and the program is blocks. My suspicion is that it is connected to subclassing in Lua because the SimpleLuaView examples both hang but the CoreAnimationScriptability example does not hang. The two SimpleLuaView applications have been altered to use 'false' to avoid the problem. Filed rdar://10660280
+
+- Now compiling release binaries under 10.7 against the 10.7 SDK with the Deployment Target still set to 10.5. There seemed to be weird runtime problems when compiled under Xcode 3/10.5/10.6 and running on 10.7. But this means PowerPC is now dropped from the binary release. 
+
+- Note: The Xcode 3 project has not been updated with any of these changes.
+
+
+v 0.3.1:
+- Fixed selector related bug due to Lion/non-Full bridgesupport switchover.
+
+
+v 0.3: (Xcode 4 / Lion compatibility changes, final PowerPC release?)
+
+- Changed LuaCocoa to use the non-'Full' .bridgesupport files instead of the 'Full' bridgesupport files because Lion removed the 'Full' versions without warning.
+	- As fallout from this change, LuaCocoa no longer requires Obj-C classes to be fully specified in BridgeSupport data to refer to them in Lua code (i.e. Using NSClassFromString to refer to a is no longer necessary to refer to an unspecified class.)
+
+- Added new Xcode 4 project to deal with Xcode 4 compatibility, plus minor Xcode script phase compatibility fixes.
+	- This might be the last PowerPC release because building PowerPC is hard in Xcode 4 and Lion
+
+- Remove use of helper categories in LuaCocoa implementation to avoid headaches with static linking.
+
+- Added APIS: LuaCocoa_PrependToLuaSearchPath, LuaCocoa_PrependToCSearchPath, LuaCocoa_AppendToCSearchPath. These APIs help you add more search paths for Lua plugins and Lua files.
+	- The LuaCocoa class will add the .app bundle's PlugIns path to the begining of the search path.
+	- The luacocoa shell tool has been modified to look in */Library/Application Support/LuaCocoa/PlugIns for additional .so modules, and */Library/Application Support/LuaCocoa/Scripts for additional .lua scripts.
+
+- Bug fix for returning const char* (strings) through the bridge, e.g. nstring:UTF8String().
+
+- Added new preprocessor define LUACOCOA_DONT_USE_BUNDLED_LUA_HEADERS so #include "lua.h" can be used instead of <LuaCocoa/lua.h> in case people need to use a custom version of Lua which is not located in a LuaCocoa subdirectory (for people building LuaCocoa themselves).
+
+- Optional Source Code: Added simple lua_isinteger implementation to stand in for projects that need LuaCocoa but use a stock version of Lua without LNUM. It is located the the directory: 'etc'
+
+- Updated bundled LPeg to 0.10.
+
+- Doxygen (in repo): Experimenting with man page generation in addition to html and Xcode DocSets
+
+
+v 0.2: (Faster, Smaller, Better)
+
+- Big performance improvements over 0.1.
+	- Optimized initialization/load times. Names are now resolved through a metatable (which calls LuaCocoa.resolveName) so launch times are now very fast.
+
+	- Cached parsed XML data so repeated method calls don't have to reparse XML data.
+
+- The LuaCocoa core framework is now over 30% smaller
+	- Removed ParseKit dependency
+	
+- Added LuaCocoa.toCocoa and LuaCocoa.toLua functions to convert between Cocoa and Lua types within Lua scripts.
+
+- Started formalizing support for instance variables in Lua subclassing. (Put your variables in a special table named __ivars.)
+(Thanks to Jonathan Mitchell for feedback, testing, and patches for this.)
+
+- Bug fixes, logging clean ups
+
+- Initial Doxygen for Obj-C & C APIs. Xcode DocSet Documentation provided too.
+
+
+v 0.1: (First public release)
+
+
+Features: 
+
+- Full bridging to classes/objects, C functions, selectors, structs, enums, constants
+
+- 32-bit and 64-bit support (uses new Obj-C 2.0 runtime), PowerPC & Intel
+
+- Support Obj-C garbage collection and non garbage collection modes
+
+- Subclassing NSObjects in Lua
+
+- Obj-C/C APIs and easily embeddable framework to allow easy integration into existing Obj-C applications
+
+- Scripting Bridge support to allow Applescript control written in Lua scripts instead of Applescript
+
+- Conversion of Lua tables to NSArray and NSDictionary
+
+- Metamethods on NSArray and NSDictionary to respond like Lua tables
+
+- Convenience metamethods to access struct fields
+
+- Auto-boxing of numbers and structs into NSNumbers and NSValues when necessary
+
+- Setter dot notation in Lua
+
+- Proper handling of BOOL types to native Lua boolean types
+
+
+Installation:
+- Developers: For easiest use, copy the LuaCocoa.framework (from the DMG binary distribution or built using the "Build LuaCocoa and Utilities" target in Xcode) to /Library/Frameworks. Then simply link against LuaCocoa.framework and use #import <LuaCocoa/LuaCocoa.h> in your code. The entire public Obj-C APi is in LuaCocoa.h.
+
+- Contained inside LuaCocoa.framework in a directory called Tools is a command line tool called luacocoa that can run standalone LuaCocoa scripts. It is basically the command line lua interpreter modified to contain LuaCocoa support.
+
+As a shortcut to explicitly invoking luacocoa followed by the script name all the time, assuming you install the framework to /Library/Frameworks, you can just make your scripts executable and run them if you put the following at the top of your Lua script:
+#!/Library/Frameworks/LuaCocoa.framework/Versions/Current/Tools/luacocoa
+e.g.
+./ScriptingBridge_iTunes.lua
+
+- Also included in the Tools directory are standalone executables of lua and luac. They are provided merely as a convenience. They may be moved/copied/deleted any way you see fit.
+
+- When you actually deploy applications using LuaCocoa, you should embed it in your app inside .app/Contents/Frameworks. LuaCocoa.framework is built to use @rpath. So you should set your app's "Runtime Search Paths" (in your Xcode build settings) to @loader_path/../Frameworks.
+
+- When embedding the framework, to save additional space (though they are not that big), you may delete the files the Tools directory of the framework (containing lua, luac, and luacocoa) assuming you don't invoke these tools yourself.
+
+- Obj-C and C API Documentation is provided in an Xcode DocSet bundle (generated via Doxygen). Copy the DocSet bundle to
+~/Library/Developer/Shared/Documentation/DocSets
+or
+/Library/Developer/Shared/Documentation/DocSets
+
+Examples:
+
+ - MinimalAppKit: which shows how to build a barebones Cocoa/windowed app in pure Lua. You will need to run this with the luacocoa command line utility.
+
+- SimpleLuaView: Shows how to write a view subclass in Lua with scaffolding in Obj-C for the main app and nib file
+
+- SimpleLuaOpenGLView: Similar to SimpleLuaView but shows off BridgeSupport automatic binding for OpenGL and does the Apple golden triangle example from their docs.
+
+- ScriptingBridge_iTunes: Using Scripting Bridge, shows how to do Applescript things written in Lua instead of Applescript. Simply opens iTunes and plays a song. You will need to run this with the luacocoa command line utility.
+
+- HybridCoreAnimationScriptability: This is the most important example in my opinion. This example was inspired by how I actually used the LuaObjCBridge in a past project. I had a main Obj-C application, but wanted to write the Core Animation UI in Lua. This would allow UI designers to actually implement the UI without needing to recompile
+the app or work in Obj-C. I also built in a way to edit the Lua script easily while the program was running and would auto-reload the Lua script when modified (detected via FSEvents) without relaunching the entire program.
+
+
+Also in the Xcode project, there is a target called Test.app. It contains a slew of many different things (but sadly not comprehensive) of what the LuaCocoa bridge can do.
+
+
+Roadmap:
+Contributions are greatly welcome! These are some of the things I want to see:
+
+- Objective Lua (please!)
+
+- LLVM Lua  (I actually have notes on my hard drive for this I've been meaning to write up)
+
+- iOS support (see JSCocoa on how they did it)
+
+- Performance optimizations (I suck at XML and really need help here)
+	- Faster XML parsing
+
+- Method swizzling
+
+- Categories
+
+- unions, bitfields, arrays
+
+- blocks (see PyObjC for implementation details, look at LuaLanes for concurrency ideas)
+
+- Xcode templates
+
+- More sample code, tutorials, documentation
+
+- Real unit tests
+
+- Xcode/Interface Builder integration
+
+
+Acknowledgements:
+This has been a very long road. My thanks to the many people I've encountered on the way. 
+
+- Tom McClean for LuaObjCBridge, much of which was the starting point for LuaCocoa
+
+- Laurent Sansonetti for sitting down with me one WWDC afternoon and walking me through how RubyCocoa and MacRuby use BridgeSupport and how I should approach the problem
+
+- Bill Bumgarner for his talks on PyObjC and BridgeSupport over the years
+
+- Greg Parker for his help at WWDC and the Obj-C mailing list
+
+- Steve Dekorte for his Lua/Objective-C bridge and sharing what he could find and remember with me
+
+- Richard Kiss for his white paper on his Lua/Objective-C bridge and also digging up what he could find for me
+
+- Dan Treiman for letting me bounce ideas off him about retain/release/garbage collection
+
+- Gus Mueller for his patches to LuaObjCBridge which are ideas I incorporated into my own patches of LuaObjCBridge and are undoubtedly seeds of ideas in LuaCocoa
+
+- Patrick Geiller for writing JSCocoa and being the first to write something using BridgeSupport that somebody like me could kind of decipher.
+
+Any everybody else I may have missed, thank you!
+
+Eric Wing
+PlayControl Software LLC
+http://playcontrol.net/opensource/LuaCocoa
+
+
