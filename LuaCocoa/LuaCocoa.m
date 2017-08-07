@@ -1903,7 +1903,7 @@ NSString* LuaCocoa_GetInfoOnFunction(lua_State* L, const char* function_name, in
 	
 	if(NULL != ar.source)
 	{
-		NSMutableString* temp_string = [NSString stringWithUTF8String:ar.source];
+		NSString* temp_string = [NSString stringWithUTF8String:ar.source];
 		// There is an annoying '@' character in front of the string.
 		if([temp_string hasPrefix:@"@"])
 		{
