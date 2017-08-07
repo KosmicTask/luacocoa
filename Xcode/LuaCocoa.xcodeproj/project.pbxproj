@@ -2902,12 +2902,8 @@
 		00D400A710A48C53005559C7 /* Debug_Native */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD_32_BIT)",
-					x86_64,
-				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_GC = supported;
+				ARCHS = "$(ARCHS_STANDARD)";
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2917,7 +2913,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = ../lua/src;
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970 x86_64";
+				VALID_ARCHS = x86_64;
 				WARNING_CFLAGS = "";
 			};
 			name = Debug_Native;
@@ -3427,12 +3423,8 @@
 		1DEB91B208733DA50010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD_32_BIT)",
-					x86_64,
-				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_GC = supported;
+				ARCHS = "$(ARCHS_STANDARD)";
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -3442,7 +3434,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = ../lua/src;
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970 x86_64";
+				VALID_ARCHS = x86_64;
 				WARNING_CFLAGS = "";
 			};
 			name = Debug;
@@ -3450,12 +3442,8 @@
 		1DEB91B308733DA50010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD_32_BIT)",
-					x86_64,
-				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_GC = supported;
+				ARCHS = "$(ARCHS_STANDARD)";
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -3464,7 +3452,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = ../lua/src;
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970 x86_64";
+				VALID_ARCHS = x86_64;
 				WARNING_CFLAGS = "";
 			};
 			name = Release;
